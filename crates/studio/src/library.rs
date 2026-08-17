@@ -134,13 +134,33 @@ impl Library {
         Library { root: root.into() }
     }
 
-    /// `~/MiniMaxMusic`, falling back to the current directory only if the home
-    /// directory cannot be determined.
+    /// `~/MiniMaxMusic` on macOS (kept stable — renaming it would orphan
+    /// existing libraries), or `%LOCALAPPDATA%\MusicMaxxer` on Windows.
+    ///
+    /// Windows does not reliably set `HOME` outside a shell — launched from
+    /// the Start Menu there is no parent process setting it — so reading it
+    /// directly silently fell back to `.`, the app's working directory,
+    /// which can be an unwritable folder like `C:\Program Files\...`. `dirs`
+    /// resolves the real per-OS convention instead. Local (not Roaming)
+    /// AppData is deliberate: a music library is local-machine data, often
+    /// large, and must never be swept into a roaming profile sync.
+    ///
+    /// Must stay in step with `assetProtocol.scope` in `tauri.conf.json` —
+    /// the player can only stream audio from a path that scope allows.
     pub fn default_root() -> PathBuf {
-        std::env::var_os("HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("MiniMaxMusic")
+        #[cfg(target_os = "windows")]
+        {
+            dirs::data_local_dir()
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join("MusicMaxxer")
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            std::env::var_os("HOME")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join("MiniMaxMusic")
+        }
     }
 
     pub fn root(&self) -> &Path {

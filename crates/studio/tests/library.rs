@@ -31,6 +31,36 @@ fn take<'a>(title: &'a str, caption: &'a str, audio: &'a [u8]) -> NewTake<'a> {
     }
 }
 
+// --------------------------------------------------------------- default root
+
+/// Regression test: `default_root()` used to read `HOME` directly, which
+/// Windows does not reliably set outside a shell — launched from the Start
+/// Menu, it silently fell back to `.`, the app's own working directory.
+#[test]
+fn default_root_resolves_a_real_per_os_directory_not_the_working_directory() {
+    let root = Library::default_root();
+    assert_ne!(
+        root,
+        std::path::PathBuf::from("."),
+        "must resolve a real directory, not silently fall back to cwd: {}",
+        root.display()
+    );
+
+    #[cfg(target_os = "windows")]
+    assert!(
+        root.ends_with("MusicMaxxer"),
+        "expected .../MusicMaxxer under LocalAppData, got {}",
+        root.display()
+    );
+
+    #[cfg(not(target_os = "windows"))]
+    assert!(
+        root.ends_with("MiniMaxMusic"),
+        "expected ~/MiniMaxMusic, got {}",
+        root.display()
+    );
+}
+
 // ------------------------------------------------------------------ slugging
 
 #[test]
