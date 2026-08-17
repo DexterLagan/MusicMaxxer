@@ -1,0 +1,60 @@
+name: Release
+
+# Tauri has no supported macOS → Windows cross-compile path (the Windows
+# bundler needs the MSVC linker and the WebView2 SDK, neither of which exist
+# on macOS). Instead this builds natively on each platform's own GitHub
+# runner — macos-latest is Apple Silicon (M-series), windows-latest is
+# x86_64 — and uploads both bundles to the same draft release.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and release (e.g. v1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            rust-target: aarch64-apple-darwin
+          - platform: windows-latest
+            rust-target: x86_64-pc-windows-msvc
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          releaseName: "MusicMaxxer ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+          args: --target ${{ matrix.rust-target }}
