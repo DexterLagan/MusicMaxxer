@@ -6,7 +6,16 @@ generation is a direct call from your own machine to MiniMax's API, and
 everything it produces is written straight to a plain-folder library on your
 disk that you own and can read without the app.
 
-![MusicMaxxer compose screen, dark mode](docs/screenshot.png)
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshot.png" alt="MusicMaxxer compose screen, dark mode"></td>
+<td width="50%"><img src="docs/screenshot-light.png" alt="MusicMaxxer compose screen, light mode"></td>
+</tr>
+<tr>
+<td align="center">Dark</td>
+<td align="center">Light</td>
+</tr>
+</table>
 
 ## What it does
 
