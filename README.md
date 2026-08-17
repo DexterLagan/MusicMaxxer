@@ -136,4 +136,4 @@ but not yet built.
 
 ## License
 
-MIT
+[MIT](LICENSE)
