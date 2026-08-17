@@ -1,0 +1,8 @@
+{
+  "cover_feature_id": "cf_9f2c4b71ae03d8c5f6b2",
+  "formatted_lyrics": "[Verse]\nWe drove the long way just to hear the end of it\n\n[Chorus]\nAnd it holds, and it holds",
+  "structure_result": "[{\"type\":\"intro\",\"start\":0.0,\"end\":8.2},{\"type\":\"verse\",\"start\":8.2,\"end\":28.4},{\"type\":\"chorus\",\"start\":28.4,\"end\":44.9}]",
+  "audio_duration": 222.4,
+  "trace_id": "77aa88bb99cc00dd11ee22ff33445566",
+  "base_resp": { "status_code": 0, "status_msg": "success" }
+}

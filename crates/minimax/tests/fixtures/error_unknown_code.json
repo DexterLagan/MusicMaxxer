@@ -1,0 +1,4 @@
+{
+  "trace_id": "deadbeefdeadbeefdeadbeefdeadbeef",
+  "base_resp": { "status_code": 9001, "status_msg": "region temporarily unavailable" }
+}

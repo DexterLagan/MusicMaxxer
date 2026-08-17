@@ -1,0 +1,4 @@
+{
+  "trace_id": "aabbccddeeff00112233445566778899",
+  "base_resp": { "status_code": 1002, "status_msg": "rate limit exceeded" }
+}

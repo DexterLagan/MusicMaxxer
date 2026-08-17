@@ -1,0 +1,18 @@
+[package]
+name = "minimax"
+version = "1.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Client for the MiniMax hosted Music API (music_generation, music_cover_preprocess)"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

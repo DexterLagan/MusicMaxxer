@@ -1,0 +1,12 @@
+{
+  "data": { "audio": "https://cdn.minimax.io/music/abc123.wav?expires=1755400000", "status": 2 },
+  "trace_id": "9c1e77aa40bb4f2f8a55c3d0e6127b41",
+  "extra_info": {
+    "music_duration": 152000,
+    "music_sample_rate": 44100,
+    "music_channel": 2,
+    "bitrate": 256000,
+    "music_size": 26845000
+  },
+  "base_resp": { "status_code": 0, "status_msg": "success" }
+}

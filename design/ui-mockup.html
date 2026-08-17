@@ -1,0 +1,3413 @@
+<title>MiniMax Music Studio — UI sketch</title>
+
+<style>
+/* ============================================================
+   TOKENS — light is the bare :root, dark overrides tokens only
+   ============================================================ */
+:root {
+  --bg:            #F4F3F1;
+  --page:          #EBE9E6;
+  --surface:       #FFFFFF;
+  --surface-2:     #F1EFEC;
+  --surface-3:     #E7E4DF;
+  --border:        #DDD9D3;
+  --border-strong: #C4BFB7;
+  --text:          #171614;
+  --text-2:        #56534D;
+  --text-3:        #8C877E;
+  --accent:        #A9640B;
+  --accent-hi:     #C57712;
+  --accent-soft:   rgba(169,100,11,.10);
+  --accent-line:   rgba(169,100,11,.38);
+  --on-accent:     #FFFFFF;
+  --danger:        #9E2F21;
+  --danger-soft:   rgba(158,47,33,.09);
+  --ok:            #2C6B4E;
+  --shadow:        0 1px 2px rgba(23,22,20,.06), 0 12px 32px rgba(23,22,20,.10);
+  --shadow-modal:  0 24px 70px rgba(23,22,20,.28);
+
+  --sans: "Avenir Next", "Avenir", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, Consolas, monospace;
+
+  --r: 6px;
+  --hair: 1px solid var(--border);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            #0E0D0C;
+    --page:          #0A0908;
+    --surface:       #191817;
+    --surface-2:     #201E1C;
+    --surface-3:     #2A2724;
+    --border:        #2B2926;
+    --border-strong: #3E3A35;
+    --text:          #EDEAE3;
+    --text-2:        #A39D93;
+    --text-3:        #726D65;
+    --accent:        #E9A13B;
+    --accent-hi:     #F5B054;
+    --accent-soft:   rgba(233,161,59,.13);
+    --accent-line:   rgba(233,161,59,.42);
+    --on-accent:     #17120A;
+    --danger:        #E4705E;
+    --danger-soft:   rgba(228,112,94,.12);
+    --ok:            #6BB58C;
+    --shadow:        0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.45);
+    --shadow-modal:  0 30px 80px rgba(0,0,0,.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:            #0E0D0C;
+  --page:          #0A0908;
+  --surface:       #191817;
+  --surface-2:     #201E1C;
+  --surface-3:     #2A2724;
+  --border:        #2B2926;
+  --border-strong: #3E3A35;
+  --text:          #EDEAE3;
+  --text-2:        #A39D93;
+  --text-3:        #726D65;
+  --accent:        #E9A13B;
+  --accent-hi:     #F5B054;
+  --accent-soft:   rgba(233,161,59,.13);
+  --accent-line:   rgba(233,161,59,.42);
+  --on-accent:     #17120A;
+  --danger:        #E4705E;
+  --danger-soft:   rgba(228,112,94,.12);
+  --ok:            #6BB58C;
+  --shadow:        0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.45);
+  --shadow-modal:  0 30px 80px rgba(0,0,0,.6);
+}
+
+/* ============================================================
+   PAGE
+   ============================================================ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 28px 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.page-head h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.page-head p {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+  max-width: 62ch;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* mockup-only control strip — deliberately not app chrome */
+.rig {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 9px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r);
+  background: transparent;
+}
+.rig .rig-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-right: 4px;
+}
+.rig button {
+  background: var(--surface);
+  border: var(--hair);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-2);
+  transition: border-color .15s, color .15s;
+}
+.rig button:hover { color: var(--text); border-color: var(--border-strong); }
+.rig .spacer { flex: 1; }
+
+/* ============================================================
+   APP FRAME
+   ============================================================ */
+.frame-scroll { overflow-x: auto; padding-bottom: 4px; }
+
+.app {
+  min-width: 1000px;
+  height: 720px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: var(--hair);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- titlebar --- */
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--surface);
+  border-bottom: var(--hair);
+  flex: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 4px;
+}
+.brand .mark {
+  width: 15px; height: 15px;
+  border-radius: 3px;
+  background: var(--accent);
+  position: relative;
+  flex: none;
+}
+.brand .mark::after {
+  content: "";
+  position: absolute; inset: 4px 6px 4px 6px;
+  background: var(--on-accent);
+  border-radius: 1px;
+}
+.brand span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.tabs { display: flex; gap: 2px; }
+.tab {
+  background: none;
+  border: 0;
+  padding: 6px 12px 7px;
+  font-size: 13.5px;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
+}
+.tab:hover { color: var(--text-2); }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+.title-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.keypill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  border: var(--hair);
+  background: var(--surface-2);
+  font-size: 11.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.keypill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--danger); flex: none; }
+.keypill[data-state="set"] .dot { background: var(--ok); }
+
+.icon-btn {
+  width: 28px; height: 26px;
+  display: grid; place-items: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-3);
+  transition: color .15s, background .15s;
+}
+.icon-btn:hover { color: var(--text); background: var(--surface-2); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* --- body layout --- */
+.body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 316px;
+  min-height: 0;
+  transition: grid-template-columns .22s ease;
+}
+.body[data-history="closed"] { grid-template-columns: minmax(0,1fr) 0px; }
+
+.pane-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+.scroller { flex: 1; overflow-y: auto; min-height: 0; }
+
+.screen { display: none; }
+.screen.is-active { display: block; }
+
+/* --- writing surface --- */
+.compose { padding: 22px 30px 30px; max-width: 780px; }
+
+.row-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+}
+
+.select {
+  appearance: none;
+  background: var(--surface);
+  border: var(--hair);
+  border-radius: 5px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 5px 26px 5px 10px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position: right 12px center, right 8px center;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+.select:disabled { opacity: .45; }
+
+.switches { margin-left: auto; display: flex; gap: 4px; }
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: none;
+  font-size: 12.5px;
+  color: var(--text-3);
+  transition: color .15s, background .15s;
+}
+.switch:hover:not(:disabled) { background: var(--surface-2); color: var(--text-2); }
+.switch:disabled { opacity: .38; cursor: not-allowed; }
+.switch .track {
+  width: 24px; height: 14px;
+  border-radius: 7px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  position: relative;
+  flex: none;
+  transition: background .15s, border-color .15s;
+}
+.switch .track::after {
+  content: "";
+  position: absolute;
+  top: 1px; left: 1px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transition: transform .16s ease, background .16s;
+}
+.switch[aria-pressed="true"] { color: var(--text); }
+.switch[aria-pressed="true"] .track { background: var(--accent-soft); border-color: var(--accent-line); }
+.switch[aria-pressed="true"] .track::after { transform: translateX(10px); background: var(--accent); }
+
+.field { padding: 18px 0; border-top: var(--hair); }
+.field.is-muted { opacity: .34; }
+.field-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+.field-head label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.req { color: var(--accent); font-family: var(--mono); font-size: 10px; letter-spacing: .1em; }
+.count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.count.over { color: var(--danger); }
+
+textarea.write {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  resize: none;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.72;
+  padding: 0;
+  min-height: 62px;
+  overflow: hidden;
+}
+textarea.write:focus { outline: none; }
+textarea.write::placeholder { color: var(--text-3); }
+textarea.write:disabled { color: var(--text-3); }
+#lyrics { min-height: 210px; overflow-y: auto; }
+
+.taglist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-bottom: 12px;
+}
+.tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: var(--hair);
+  background: var(--surface);
+  color: var(--text-3);
+  transition: color .12s, border-color .12s, background .12s;
+}
+.tag:hover:not(:disabled) { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+.tag:disabled { cursor: not-allowed; }
+
+/* --- settings disclosure --- */
+.disclosure { border-top: var(--hair); }
+.disc-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+.disc-head:hover { color: var(--text); }
+.disc-head .chev { transition: transform .18s ease; color: var(--text-3); display: grid; }
+.disc-head[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.disc-head .summary {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.disc-body { display: none; padding: 4px 0 20px; }
+.disc-body.is-open { display: block; }
+
+.grid-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px 20px;
+}
+.setting { display: flex; flex-direction: column; gap: 5px; }
+.setting > span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.setting .hint { font-family: var(--sans); font-size: 11.5px; letter-spacing: 0; text-transform: none; color: var(--text-3); }
+.setting.wide { grid-column: 1 / -1; }
+.check-row { display: flex; align-items: center; gap: 8px; }
+.check-row input { accent-color: var(--accent); margin: 0; }
+.check-row input:disabled + .hint { opacity: .5; }
+.path-row { display: flex; gap: 8px; align-items: center; }
+.path {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--surface);
+  border: var(--hair);
+  border-radius: 5px;
+  padding: 6px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn {
+  border: var(--hair);
+  background: var(--surface);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+  transition: border-color .15s, color .15s;
+}
+.btn:hover { color: var(--text); border-color: var(--border-strong); }
+.btn.danger { color: var(--danger); }
+
+.btn-accent {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 5px;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  transition: background .15s, border-color .15s, opacity .15s;
+}
+.btn-accent:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
+.btn-accent:disabled { opacity: .4; cursor: not-allowed; }
+.btn-accent.is-cancel { background: transparent; color: var(--danger); border-color: var(--danger); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: var(--hair);
+}
+.kbd {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.actions .right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+/* --- inline notices --- */
+.notice {
+  border: var(--hair);
+  border-left: 2px solid var(--text-3);
+  border-radius: 5px;
+  background: var(--surface);
+  padding: 11px 14px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.notice.error { border-left-color: var(--danger); background: var(--danger-soft); color: var(--text); }
+.notice.warn { border-left-color: var(--accent); background: var(--accent-soft); }
+.notice strong { font-weight: 600; }
+.notice details { margin-top: 6px; }
+.notice summary { font-size: 11.5px; color: var(--text-3); cursor: pointer; }
+.notice code { font-family: var(--mono); font-size: 11px; color: var(--text-2); }
+
+/* --- generating state --- */
+.gen {
+  margin-top: 18px;
+  border: var(--hair);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 14px 16px;
+  display: none;
+}
+.gen.is-on { display: block; }
+.gen-top {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+}
+.gen-top .elapsed {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.gen p { margin: 4px 0 10px; font-size: 11.5px; color: var(--text-3); }
+.bar { height: 2px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.bar i {
+  display: block;
+  height: 100%;
+  width: 34%;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: slide 1.9s ease-in-out infinite;
+}
+@keyframes slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(295%); }
+}
+
+/* ============================================================
+   COVER SCREEN
+   ============================================================ */
+.cover { padding: 22px 30px 30px; max-width: 780px; }
+.stage { border-top: var(--hair); padding: 18px 0; }
+.stage:first-of-type { border-top: 0; }
+.stage-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+.stage-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--text-3);
+  border: var(--hair);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.stage-head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.chip-free {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ok);
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.stage-head .meta { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+.drop {
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+.drop .btn-row { display: flex; gap: 8px; }
+.drop small { font-size: 11px; }
+
+.timeline { display: flex; gap: 2px; height: 34px; margin: 12px 0 6px; }
+.seg {
+  flex: 1;
+  border-radius: 3px;
+  background: var(--surface-2);
+  border: var(--hair);
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text-3);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.seg[data-kind="chorus"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+.tl-scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text-3);
+}
+
+.rights {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: var(--hair);
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin: 4px 0 16px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.rights input { margin-top: 3px; accent-color: var(--accent); }
+
+/* ============================================================
+   HISTORY RAIL
+   ============================================================ */
+.pane-hist {
+  border-left: var(--hair);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+.hist-head {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-bottom: var(--hair);
+  flex: none;
+}
+.hist-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.hist-title .n { margin-left: auto; font-variant-numeric: tabular-nums; }
+.search {
+  width: 100%;
+  background: var(--surface-2);
+  border: var(--hair);
+  border-radius: 5px;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.search::placeholder { color: var(--text-3); }
+.search:focus { outline: none; border-color: var(--accent-line); }
+.hist-filters { display: flex; gap: 6px; }
+.hist-filters .select { flex: 1; }
+
+.hist-list { flex: 1; overflow-y: auto; min-height: 0; }
+.hist-item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  padding: 11px 16px 12px;
+  border: 0;
+  border-bottom: var(--hair);
+  border-left: 2px solid transparent;
+  background: none;
+  transition: background .12s, border-color .12s;
+}
+.hist-item:hover { background: var(--surface-2); }
+.hist-item.is-current { border-left-color: var(--accent); background: var(--surface-2); }
+.hi-row1 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+.hi-row1 .dur { margin-left: auto; font-variant-numeric: tabular-nums; }
+.hi-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 4px 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hi-sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.45;
+  margin-bottom: 7px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hi-wave { width: 100%; height: 22px; display: block; }
+.hi-acts {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity .14s;
+}
+.hist-item:hover .hi-acts,
+.hist-item:focus-within .hi-acts,
+.hist-item.is-current .hi-acts { opacity: 1; }
+.mini {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: var(--hair);
+  background: var(--surface);
+  color: var(--text-3);
+}
+.mini:hover { color: var(--accent); border-color: var(--accent-line); }
+
+.hist-empty { padding: 26px 18px; color: var(--text-3); font-size: 12.5px; }
+
+/* ============================================================
+   PLAYER + STATUS BAR
+   ============================================================ */
+.player {
+  flex: none;
+  border-top: var(--hair);
+  background: var(--surface);
+  padding: 12px 30px 14px;
+  display: none;
+  gap: 14px;
+  align-items: center;
+}
+.player.is-on { display: flex; }
+.play-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid; place-items: center;
+  flex: none;
+}
+.play-btn svg { width: 13px; height: 13px; }
+.play-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.play-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.play-meta .name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.play-meta .time { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.play-wave { width: 100%; height: 40px; display: block; cursor: pointer; }
+/* ---------- song title ---------- */
+.titlefield {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 14px;
+}
+input.songtitle {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+input.songtitle:focus { outline: none; }
+input.songtitle::placeholder { color: var(--text-3); font-weight: 500; }
+.titlefield .slug {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 44%;
+  text-align: right;
+}
+
+/* ---------- filterable combo ---------- */
+.combo { position: relative; }
+.combo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 178px;
+  background: var(--surface);
+  border: var(--hair);
+  border-radius: 5px;
+  padding: 5px 9px 5px 10px;
+  font-size: 12.5px;
+  color: var(--text);
+  text-align: left;
+}
+.combo-btn:hover { border-color: var(--border-strong); }
+.combo-btn .cv { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.combo-btn .cc { color: var(--text-3); display: grid; }
+.combo[data-open="true"] .combo-btn { border-color: var(--accent-line); }
+
+.combo-pop {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 292px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  display: none;
+}
+.combo[data-open="true"] .combo-pop { display: block; }
+.combo-search {
+  width: 100%;
+  background: var(--bg);
+  border: var(--hair);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.combo-search:focus { outline: none; border-color: var(--accent-line); }
+.combo-list { max-height: 216px; overflow-y: auto; }
+.combo-opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: var(--text-2);
+}
+.combo-opt .on { display: block; font-size: 12.5px; color: var(--text); }
+.combo-opt .od { display: block; font-family: var(--mono); font-size: 10px; color: var(--text-3); }
+.combo-opt:hover, .combo-opt.is-active { background: var(--surface-2); }
+.combo-opt[aria-selected="true"] .on { color: var(--accent); }
+.combo-none { padding: 8px; font-size: 12px; color: var(--text-3); }
+.combo-foot {
+  border-top: var(--hair);
+  margin-top: 5px;
+  padding-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.combo-link {
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.combo-link:hover { background: var(--surface-2); color: var(--text-2); }
+
+/* ---------- drop target ---------- */
+.dropzone {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,9,8,.62);
+  backdrop-filter: blur(1px);
+}
+.dropzone.is-on { display: flex; }
+.dz-card {
+  border: 2px dashed var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 26px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-modal);
+}
+.dz-card strong { display: block; font-size: 15px; margin-bottom: 4px; }
+.dz-card span { font-size: 12.5px; color: var(--text-2); }
+.dz-card em {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-style: normal;
+  color: var(--text-3);
+}
+
+/* ---------- recipe viewer ---------- */
+.modal.wide { width: 620px; }
+.recipe-pre {
+  margin: 0;
+  max-height: 380px;
+  overflow: auto;
+  background: var(--bg);
+  border: var(--hair);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-2);
+  white-space: pre;
+  tab-size: 2;
+}
+.recipe-pre .k { color: var(--accent); }
+.recipe-pre .d { color: var(--text-3); }
+.recipe-pre .h { color: var(--text); font-weight: 600; }
+.recipe-pre .t { color: var(--accent); }
+
+/* ============================================================
+   LYRIC TOOLS — syllable gutter, check, enhance
+   ============================================================ */
+.lyric-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+}
+.lyric-tools .grow { flex: 1; }
+.mini-btn {
+  border: var(--hair);
+  background: var(--surface);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  transition: border-color .14s, color .14s;
+}
+.mini-btn:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+.mini-btn:disabled { opacity: .4; cursor: not-allowed; }
+.mini-btn.on { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+.mini-btn.is-off {
+  border-style: dashed;
+  color: var(--text-3);
+  background: transparent;
+}
+.mini-btn.is-off:hover { color: var(--text-2); border-color: var(--border-strong); }
+.mini-btn .off-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-left: 6px;
+  opacity: .75;
+}
+.setting.is-locked { opacity: .42; pointer-events: none; }
+
+.lyric-wrap { display: flex; align-items: flex-start; gap: 14px; }
+.lyric-wrap textarea {
+  flex: 1;
+  min-width: 0;
+  line-height: 26px;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.gutter {
+  flex: none;
+  width: 58px;
+  display: none;
+  flex-direction: column;
+  padding-top: 0;
+  user-select: none;
+}
+.gutter.is-on { display: flex; }
+.gutter .g {
+  height: 26px;
+  line-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.gutter .g .syl { min-width: 20px; text-align: right; }
+.gutter .g .syl.approx { color: var(--border-strong); }
+.gutter .g .rh {
+  min-width: 10px;
+  text-align: center;
+  color: var(--border-strong);
+}
+.gutter .g.flag .syl { color: var(--danger); font-weight: 600; }
+.gutter .g.rhymed .rh { color: var(--accent); }
+
+/* ---------- findings ---------- */
+.findings { display: flex; flex-direction: column; gap: 1px; margin-top: 14px; }
+.findings-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-bottom: 8px;
+}
+.findings-head .by { margin-left: auto; letter-spacing: 0; text-transform: none; }
+.finding {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  border: var(--hair);
+  border-left: 2px solid var(--text-3);
+  border-radius: 5px;
+  background: var(--surface);
+  margin-bottom: 6px;
+}
+.finding[data-sev="hard"] { border-left-color: var(--danger); }
+.finding .f-body { min-width: 0; }
+.finding .f-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.finding .anchor { color: var(--text-2); }
+.finding .kind { color: var(--text-3); }
+.finding .by { margin-left: auto; letter-spacing: 0; text-transform: none; }
+.finding .f-quote {
+  font-size: 13.5px;
+  color: var(--text);
+  margin: 5px 0 3px;
+  padding-left: 9px;
+  border-left: 2px solid var(--border-strong);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.finding .f-quote:hover { border-left-color: var(--accent); color: var(--accent); }
+.finding .f-note { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.5; }
+.gutter .g.hi { background: var(--accent-soft); border-radius: 3px; }
+.gutter .g.hi .syl { color: var(--accent); }
+.finding .sugg {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-top: 7px;
+  white-space: pre-wrap;
+}
+.findings-empty {
+  border: var(--hair);
+  border-left: 2px solid var(--ok);
+  border-radius: 5px;
+  background: var(--surface);
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* ---------- diff ---------- */
+.diff { display: flex; flex-direction: column; gap: 2px; max-height: 360px; overflow-y: auto; }
+.diff-row {
+  display: grid;
+  grid-template-columns: 22px 34px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 6px;
+  border-radius: 5px;
+}
+.diff-row:hover { background: var(--surface-2); }
+.diff-row input { accent-color: var(--accent); margin-top: 3px; }
+.diff-row .ln { font-family: var(--mono); font-size: 10px; color: var(--text-3); padding-top: 3px; }
+.diff-row .was,
+.diff-row .now { font-size: 13px; line-height: 1.5; }
+.diff-row .was { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+.diff-row .now { color: var(--text); }
+.diff-row .why { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+
+/* ---------- radio group ---------- */
+.radios { display: flex; gap: 6px; }
+.radios label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: var(--hair);
+  border-radius: 5px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color .14s, color .14s;
+}
+.radios label:hover { color: var(--text); border-color: var(--border-strong); }
+.radios input { accent-color: var(--accent); margin: 0; }
+.radios input:checked + span { color: var(--text); }
+
+.modal-section {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-top: 4px;
+}
+.modal-rule { height: 1px; background: var(--border); margin: 2px 0; }
+
+.statusbar {
+  flex: none;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  border-top: var(--hair);
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.statusbar .sep { color: var(--border-strong); }
+.statusbar .right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.statusbar .live { color: var(--accent); font-variant-numeric: tabular-nums; }
+.statusbar .throttle { color: var(--danger); }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,9,8,.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  z-index: 20;
+}
+.scrim.is-on { display: flex; }
+.modal {
+  width: 480px;
+  max-width: 100%;
+  background: var(--surface);
+  border: var(--hair);
+  border-radius: 8px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+.modal-head {
+  padding: 16px 20px 12px;
+  border-bottom: var(--hair);
+}
+.modal-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.modal-head p { margin: 4px 0 0; font-size: 12.5px; color: var(--text-2); }
+.modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal-foot {
+  padding: 12px 20px;
+  border-top: var(--hair);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.modal-foot .right { margin-left: auto; display: flex; gap: 8px; }
+.input {
+  width: 100%;
+  background: var(--bg);
+  border: var(--hair);
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+}
+.input:focus { outline: none; border-color: var(--accent-line); }
+.lockline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.lockline svg { width: 13px; height: 13px; flex: none; }
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 12px;
+}
+.note {
+  border: var(--hair);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 16px 18px 18px;
+}
+.note h3 {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.note ul { margin: 0; padding-left: 17px; display: flex; flex-direction: column; gap: 7px; }
+.note li { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+.note li b { color: var(--text); font-weight: 600; }
+.note code { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+
+<div class="wrap">
+
+  <header class="page-head">
+    <div>
+      <div class="eyebrow">UI sketch · for validation</div>
+      <h1>MiniMax Music Studio</h1>
+      <p>A clickable mockup of the desktop app described in the build spec. Everything below is a
+        front-end sketch — no network calls, no key storage. Generation is faked on a timer so the
+        waiting, error and playback states can be judged before the Rust side exists.</p>
+    </div>
+    <p style="max-width:26ch;font-size:12.5px;color:var(--text-3);margin:0">Theme now follows your system.
+      Override it in the app: gear icon → Appearance.</p>
+  </header>
+
+  <div class="rig">
+    <span class="rig-label">Force a state</span>
+    <button data-demo="error">Error 1008</button>
+    <button data-demo="auth">Error 2049</button>
+    <button data-demo="throttle">Rate limited</button>
+    <button data-demo="key">API key dialog</button>
+    <button data-demo="drop">Recipe dropped on window</button>
+    <button data-demo="dropcover">Cover recipe, source missing</button>
+    <button data-demo="assistant">Lyric assistant enabled</button>
+    <button data-demo="firstrun">First run (no key, empty library)</button>
+    <span class="spacer"></span>
+    <button data-demo="reset">Reset</button>
+  </div>
+
+  <div class="frame-scroll">
+  <div class="app">
+
+    <!-- ================= TITLEBAR ================= -->
+    <div class="titlebar">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><span>MiniMax Music</span></div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-screen="compose">Compose</button>
+        <button class="tab" role="tab" aria-selected="false" data-screen="cover">Cover</button>
+      </div>
+      <div class="title-right">
+        <span class="keypill" id="keyPill" data-state="set"><span class="dot"></span><span id="keyPillText">Key in Keychain</span></span>
+        <button class="icon-btn" id="settingsBtn" title="API key & app settings" aria-label="API key and app settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.5.55.87 1.06 1H21a2 2 0 1 1 0 4h-.09c-.5.02-.94.36-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="histBtn" title="Toggle history pane" aria-label="Toggle history pane">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= BODY ================= -->
+    <div class="body" id="appBody" data-history="open">
+
+      <div class="pane-main">
+        <div class="scroller">
+
+          <!-- ---------- COMPOSE ---------- -->
+          <section class="screen is-active" id="screen-compose">
+            <div class="compose">
+
+              <div class="titlefield">
+                <input class="songtitle" id="songTitle" placeholder="Untitled song" aria-label="Song title" maxlength="80">
+                <span class="slug" id="titleSlug"></span>
+              </div>
+
+              <div class="row-top">
+                <div class="combo" id="presetCombo" data-open="false">
+                  <button class="combo-btn" id="presetBtn" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="cv" id="presetLabel">Last used</span>
+                    <span class="cc"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+                  </button>
+                  <div class="combo-pop" id="presetPop">
+                    <input class="combo-search" id="presetSearch" placeholder="Filter presets…" aria-label="Filter presets">
+                    <div class="combo-list" id="presetList" role="listbox" aria-label="Presets"></div>
+                    <div class="combo-foot">
+                      <button class="combo-link" id="openRecipe" type="button">Open a song.md recipe…</button>
+                      <button class="combo-link" id="editPresets" type="button">Edit presets.json…</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="switches">
+                  <button class="switch" id="swInst" aria-pressed="false"><span class="track"></span>Instrumental</button>
+                  <button class="switch" id="swAuto" aria-pressed="false"><span class="track"></span>Auto-write lyrics</button>
+                </div>
+              </div>
+
+              <div class="field" id="fieldCaption">
+                <div class="field-head">
+                  <label for="caption">Caption</label>
+                  <span class="req" id="capReq" hidden>required</span>
+                  <span class="count" id="capCount">0 / 2,000</span>
+                </div>
+                <textarea class="write" id="caption" rows="3" placeholder="Genre, tempo, key, mood, vocal character, arrangement…"></textarea>
+              </div>
+
+              <div class="field" id="fieldLyrics">
+                <div class="field-head">
+                  <label for="lyrics">Lyrics</label>
+                  <span class="count" id="lyrCount">0 / 3,500</span>
+                </div>
+                <div class="taglist" id="tags"></div>
+                <div class="lyric-tools">
+                  <button class="mini-btn on" id="gutterBtn" aria-pressed="true">Syllables &amp; rhyme</button>
+                  <span class="grow"></span>
+                  <button class="mini-btn" id="checkBtn">Check lyrics</button>
+                  <button class="mini-btn is-off" id="enhanceBtn">Enhance<span class="off-tag" id="enhanceTag">off</span></button>
+                </div>
+                <div class="lyric-wrap">
+                  <textarea class="write" id="lyrics" wrap="off" placeholder="[Verse]&#10;One line per line. Section tags above insert at the cursor."></textarea>
+                  <div class="gutter is-on" id="lyricGutter" aria-hidden="true"></div>
+                </div>
+                <div id="findings"></div>
+                <div class="notice warn" id="autoNote" hidden style="margin-top:14px">
+                  <strong>MiniMax writes the lyrics.</strong> <code>lyrics_optimizer</code> is a field on the same
+                  request — no second service and no extra API key. The response returns audio only, so the words
+                  are not saved to <code>song.md</code> and this take will not reproduce.
+                  <button class="btn" id="recoverLyrics" style="margin-top:9px">Recover lyrics after generating</button>
+                </div>
+              </div>
+
+              <div class="disclosure">
+                <button class="disc-head" id="discBtn" aria-expanded="false" aria-controls="discBody">
+                  <span class="chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+                  Output &amp; model
+                  <span class="summary" id="discSummary">music-3.0-free · wav 44.1 kHz · 3 rpm</span>
+                </button>
+                <div class="disc-body" id="discBody">
+                  <div class="grid-settings">
+                    <label class="setting">
+                      <span>Model</span>
+                      <select class="select" id="model">
+                        <option value="music-3.0-free" data-rpm="3">music-3.0-free — 3 rpm, any API key</option>
+                        <option value="music-3.0" data-rpm="120">music-3.0 — 120 rpm, paid plan</option>
+                        <option value="music-2.6-free" data-rpm="3">music-2.6-free — 3 rpm, any API key</option>
+                        <option value="music-2.6" data-rpm="120">music-2.6 — 120 rpm, paid plan</option>
+                      </select>
+                      <span class="hint" id="modelHint">Free tier: 3 requests per minute, throttled locally.</span>
+                    </label>
+                    <label class="setting">
+                      <span>Format</span>
+                      <select class="select" id="format">
+                        <option value="wav" selected>wav</option>
+                        <option value="mp3">mp3</option>
+                        <option value="pcm">pcm</option>
+                      </select>
+                      <span class="hint">wav by default — you are producing masters.</span>
+                    </label>
+                    <label class="setting">
+                      <span>Sample rate</span>
+                      <select class="select" id="rate">
+                        <option>44100</option><option>32000</option><option>24000</option><option>16000</option>
+                      </select>
+                    </label>
+                    <label class="setting">
+                      <span>Bitrate</span>
+                      <select class="select" id="bitrate" disabled>
+                        <option>256000</option><option>128000</option><option>64000</option><option>32000</option>
+                      </select>
+                      <span class="hint" id="brHint">mp3 only.</span>
+                    </label>
+                    <label class="setting wide">
+                      <span>Recipe in file tags</span>
+                      <div class="check-row">
+                        <input type="checkbox" id="embedRecipe" checked disabled>
+                        <span class="hint" id="embedHint">mp3 only — the recipe is copied into an ID3 comment frame so a track that leaves the library still carries it. wav and pcm are skipped.</span>
+                      </div>
+                    </label>
+                    <label class="setting wide">
+                      <span>Library folder</span>
+                      <div class="path-row">
+                        <span class="path">~/MiniMaxMusic</span>
+                        <button class="btn" type="button">Change…</button>
+                        <button class="btn" type="button">Reveal</button>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn-accent" id="genBtn">Generate</button>
+                <span class="kbd">⌘ ↵</span>
+                <div class="right">
+                  <button class="btn" id="recipeBtn" type="button">song.md…</button>
+                  <span class="kbd" id="rateNote">2 of 3 requests left this minute</span>
+                </div>
+              </div>
+
+              <div class="gen" id="genPanel">
+                <div class="gen-top">
+                  <strong>Generating</strong>
+                  <button class="btn danger" id="cancelBtn">Cancel</button>
+                  <span class="elapsed" id="elapsed">00:00</span>
+                </div>
+                <p>The API answers once, when the track is finished — there is no progress to report.
+                  Typical wait is one to three minutes. Cancelling drops the request and writes nothing.</p>
+                <div class="bar"><i></i></div>
+              </div>
+
+              <div id="notices"></div>
+
+            </div>
+          </section>
+
+          <!-- ---------- COVER ---------- -->
+          <section class="screen" id="screen-cover">
+            <div class="cover">
+
+              <div class="rights">
+                <input type="checkbox" id="rightsBox">
+                <label for="rightsBox">I hold the rights to the reference recording, or it is my own.
+                  Required once per session; recorded in <code style="font-family:var(--mono)">run.json</code>.</label>
+              </div>
+
+              <div class="stage">
+                <div class="stage-head">
+                  <span class="stage-num">Step 1</span>
+                  <h3>Load reference</h3>
+                  <span class="chip-free">no charge</span>
+                  <span class="meta" id="refMeta">3:42 · 44.1 kHz · demo-take.wav</span>
+                </div>
+                <div class="drop">
+                  <div>Drop an audio file, or</div>
+                  <div class="btn-row">
+                    <button class="btn" type="button">Choose file…</button>
+                    <button class="btn" type="button">Paste URL…</button>
+                  </div>
+                  <small>6 s – 6 min · under 50 MB · mp3, wav, flac</small>
+                </div>
+                <div class="timeline" id="timeline"></div>
+                <div class="tl-scale"><span>0:00</span><span>1:51</span><span>3:42</span></div>
+              </div>
+
+              <div class="stage">
+                <div class="stage-head">
+                  <span class="stage-num">Step 2</span>
+                  <h3>Edit lyrics &amp; style</h3>
+                  <span class="meta">from ASR · editable</span>
+                </div>
+                <div class="titlefield">
+                  <input class="songtitle" id="coverTitle" placeholder="Untitled cover" aria-label="Song title" maxlength="80" value="Hold On (gospel rework)">
+                </div>
+                <div class="field" style="border-top:0;padding-top:0">
+                  <div class="field-head">
+                    <label for="coverPrompt">Style prompt</label>
+                    <span class="req">10–300</span>
+                    <span class="count" id="cpCount">0 / 300</span>
+                  </div>
+                  <textarea class="write" id="coverPrompt" rows="2" placeholder="Slow gospel-soul rework, 68 BPM, Hammond organ, brushed kit, single female lead with room reverb."></textarea>
+                </div>
+                <div class="field">
+                  <div class="field-head">
+                    <label for="coverLyrics">Lyrics</label>
+                    <span class="req">10–1,000</span>
+                    <span class="count" id="clCount">0 / 1,000</span>
+                  </div>
+                  <textarea class="write" id="coverLyrics" style="min-height:150px"></textarea>
+                </div>
+                <div class="actions">
+                  <button class="btn-accent" id="coverGen" disabled>Generate cover</button>
+                  <span class="kbd">Confirm rights to enable</span>
+                  <div class="right"><button class="btn">Quick cover — skip lyric editing</button></div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+        </div><!-- /scroller -->
+
+        <!-- ---------- PLAYER ---------- -->
+        <div class="player" id="player">
+          <button class="play-btn" id="playBtn" aria-label="Play">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l12 7-12 7z"/></svg>
+          </button>
+          <div class="play-main">
+            <div class="play-meta">
+              <span class="name" id="playName">acid jazz funk — take 3</span>
+              <span id="playModel" style="font-family:var(--mono);font-size:10.5px;color:var(--text-3)">music-3.0-free · wav</span>
+              <span class="time"><span id="playPos">0:00</span> / <span id="playDur">0:25</span></span>
+            </div>
+            <canvas class="play-wave" id="playWave"></canvas>
+          </div>
+          <button class="btn" id="revealBtn">Reveal</button>
+        </div>
+
+        <!-- ---------- STATUS BAR ---------- -->
+        <div class="statusbar">
+          <span id="sbModel">music-3.0-free</span>
+          <span class="sep">·</span>
+          <span id="sbFormat">wav 44.1 kHz</span>
+          <span class="sep">·</span>
+          <span>~/MiniMaxMusic</span>
+          <div class="right">
+            <span id="sbLive"></span>
+            <span id="sbKey">key: Keychain</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- HISTORY ---------- -->
+      <aside class="pane-hist">
+        <div class="hist-head">
+          <div class="hist-title">History <span class="n" id="histCount">4</span></div>
+          <input class="search" id="histSearch" placeholder="Search captions and lyrics">
+          <div class="hist-filters">
+            <select class="select" id="histModel" aria-label="Filter by model">
+              <option value="">All models</option>
+              <option>music-3.0-free</option>
+              <option>music-3.0</option>
+              <option>music-cover-free</option>
+            </select>
+          </div>
+        </div>
+        <div class="hist-list" id="histList"></div>
+      </aside>
+
+    </div><!-- /body -->
+
+    <!-- ================= DROP TARGET ================= -->
+    <div class="dropzone" id="dropzone">
+      <div class="dz-card">
+        <strong>Drop to restore</strong>
+        <span>A <code style="font-family:var(--mono)">song.md</code> recipe repopulates every control.</span>
+        <em>reference audio drops onto the Cover tab instead</em>
+      </div>
+    </div>
+
+    <!-- ================= RECIPE VIEWER ================= -->
+    <div class="scrim" id="recipeScrim">
+      <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="recipeTitle">
+        <div class="modal-head">
+          <h2 id="recipeTitle">song.md</h2>
+          <p>Written beside the song, shared by every take. Edit it in any text editor and drop it
+            back on the window to restore the whole form.</p>
+        </div>
+        <div class="modal-body">
+          <pre class="recipe-pre" id="recipePre"></pre>
+        </div>
+        <div class="modal-foot">
+          <span class="kbd" id="recipePath">~/MiniMaxMusic/six-flights-up/song.md</span>
+          <div class="right">
+            <button class="btn" id="recipeCopy">Copy</button>
+            <button class="btn" id="recipeSave">Save a copy…</button>
+            <button class="btn" id="recipeClose">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= ENHANCE DIFF ================= -->
+    <div class="scrim" id="diffScrim">
+      <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="diffTitle">
+        <div class="modal-head">
+          <h2 id="diffTitle">Proposed rewrites</h2>
+          <p>Nothing changes until you apply. Untick anything you'd rather keep — and it's one undo
+            afterwards either way.</p>
+        </div>
+        <div class="modal-body">
+          <div class="diff" id="diffList"></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" id="diffNone">Untick all</button>
+          <div class="right">
+            <button class="btn" id="diffCancel">Cancel</button>
+            <button class="btn-accent" id="diffApply" style="padding:6px 14px;font-size:12.5px">Apply selected</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SETTINGS / KEY MODAL ================= -->
+    <div class="scrim" id="scrim">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <h2 id="modalTitle">Settings</h2>
+          <p>Your key is stored in the macOS Keychain — never in a config file, a log, or the app window.</p>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section">API key</div>
+          <div class="setting">
+            <input class="input" id="keyInput" type="password" placeholder="paste your MiniMax API key" value="••••••••••••••••••••••••8f21">
+          </div>
+          <div class="lockline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg>
+            Requests are made from the Rust process. The webview never sees the key.
+          </div>
+          <div><button class="btn" id="importEnv">Import from MINIMAX_API_KEY</button></div>
+
+          <div class="modal-rule"></div>
+          <div class="modal-section">Lyric assistant — optional, off by default</div>
+          <div class="check-row">
+            <input type="checkbox" id="orEnable">
+            <span class="hint" style="font-size:12.5px;color:var(--text-2)">Enable rewrites and craft
+              notes through OpenRouter. Leave off and the app never contacts a text model.</span>
+          </div>
+          <div class="setting is-locked" id="orKeyWrap">
+            <input class="input" id="orKey" type="password" placeholder="paste your OpenRouter API key">
+          </div>
+          <div class="setting is-locked" id="orModelWrap">
+            <div class="combo" id="modelCombo" data-open="false">
+              <button class="combo-btn" id="orModelBtn" aria-haspopup="listbox" aria-expanded="false" style="min-width:100%">
+                <span class="cv" id="orModelLabel">anthropic/claude-sonnet-5</span>
+                <span class="cc"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="combo-pop" id="orModelPop" style="width:100%">
+                <input class="combo-search" id="orModelSearch" placeholder="Filter, or type any OpenRouter model ID" aria-label="Model">
+                <div class="combo-list" id="orModelList" role="listbox" aria-label="Text models"></div>
+              </div>
+            </div>
+          </div>
+          <div class="lockline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg>
+            Separate Keychain entry from the MiniMax key. Syllables, rhyme and the measured checks
+            come from the bundled pronunciation dictionary and never leave the machine.
+          </div>
+
+          <div class="modal-rule"></div>
+          <div class="modal-section">Appearance</div>
+          <div class="radios" id="themeRadios">
+            <label><input type="radio" name="theme" value="system" checked><span>System</span></label>
+            <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn danger" id="clearKey">Clear key</button>
+          <div class="right">
+            <button class="btn" id="modalCancel">Cancel</button>
+            <button class="btn-accent" id="modalSave" style="padding:6px 14px;font-size:12.5px">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app -->
+  </div><!-- /frame-scroll -->
+
+  <div class="notes">
+    <div class="note">
+      <h3>What this sketch decides</h3>
+      <ul>
+        <li><b>Default view is three things:</b> caption, lyrics, Generate. Model and format hide behind one disclosure row that still shows its state in the summary, so nothing is secretly wrong.</li>
+        <li><b>Fields are a writing surface,</b> not boxes — hairline rules, no input chrome, counters in the label row.</li>
+        <li><b>The wait is honest.</b> No spinner: elapsed time, a plain sentence saying the API reports no progress, and Cancel.</li>
+        <li><b>Song title leads the page,</b> set once and carried into the folder name, the history entry, the file tags and run.json. Takes are numbered under it.</li>
+        <li><b>History is a rail, not a screen,</b> collapsible from the titlebar. Each take offers Play, Clone and Reveal.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Recipe &amp; receipt</h3>
+      <ul>
+        <li><b>One folder per song, takes inside.</b>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);line-height:1.7;margin-top:6px;white-space:pre">~/MiniMaxMusic/
+  six-flights-up/
+    song.md        ← recipe
+    take-01/
+      track.wav
+      run.json     ← receipt
+    take-04/
+      …</div></li>
+        <li><b>song.md is the inputs</b> — YAML front matter for settings, <code>## Caption</code> and <code>## Lyrics</code> for the writing. Hand-editable, rewritten on every generate.</li>
+        <li><b>run.json is the record</b> — trace_id, extra_info, call duration, exact payload sent. Never edited, one per take.</li>
+        <li>Splitting them matters: editing a recipe to try take 12 must not rewrite the provenance of take 11.</li>
+        <li><b>Three ways back in:</b> drop a song.md on the window, the preset combo's <i>Open a song.md recipe…</i>, or double-click the file once the app owns the extension.</li>
+        <li><b>mp3 carries a copy</b> in an ID3 comment frame, so a track that leaves the library still holds its recipe. wav and pcm are skipped — tagging them is fragile and DAWs strip it.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Auto-write lyrics</h3>
+      <ul>
+        <li><b>No second API key.</b> <code>lyrics_optimizer</code> is a boolean on the same
+          <code>/v1/music_generation</code> call. Set it true with <code>lyrics</code> empty and the music model
+          writes the words itself.</li>
+        <li><b>But the words never come back.</b> The response carries <code>data.audio</code> and
+          <code>extra_info</code> — no lyrics text. So the take is unreproducible: generate twice from the same
+          caption and you get two different songs with no record of either.</li>
+        <li><b>The fix is already in your spec.</b> Send the finished track to
+          <code>music_cover_preprocess</code> — the free step from the Cover flow — and it returns
+          <code>formatted_lyrics</code>, ASR'd with section tags. Write those into song.md and the hole closes at
+          no cost.</li>
+        <li>Turn the switch on to see how this is surfaced in the form.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Lyric tools</h3>
+      <ul>
+        <li><b>The whole thing works with no key and no network.</b> Syllables and rhyme come from a
+          bundled pronunciation dictionary — the full CMU set is ~134,000 words and a few hundred KB
+          in the binary.</li>
+        <li><b>Rhyme is compared as sound, not spelling.</b> Each word's rime — last stressed vowel to
+          the end — is matched phonetically, so <i>love/glove</i> pair and <i>love/move</i> don't,
+          and <i>eight/gate/weight/late</i> all pair across four spellings. Letter-matching gets
+          every one of those wrong.</li>
+        <li>The gutter shows each line's count and its rhyme letter, assigned per section;
+          <code>·</code> means no partner. A count shown as <code>~9</code> fell back to the spelling
+          heuristic because the word isn't in the dictionary — rare with the full set, common in
+          this sketch, which carries about a hundred words.</li>
+        <li><b>Check runs offline too.</b> Three measured findings need no model at all — parallel
+          lines drifting three or more syllables, an unrhymed line in a rhyming section, lines too
+          long for one breath. All arithmetic over the two primitives above.</li>
+        <li><b>The assistant is off by default</b> and is the only thing that leaves the machine.
+          Tick it on in Settings and add an OpenRouter key; leave it alone and no text model is ever
+          contacted. Enhance shows an <code>off</code> tag until you enable it.</li>
+        <li><b>A model adds the craft layer only</b> — imagery, cliché, prosody. Those notes are
+          labelled with the model that wrote them; measured notes aren't.</li>
+        <li><b>No line numbers.</b> Findings anchor the way a musician would say it —
+          <i>Chorus 2 · line 2</i> — with the line quoted beneath. Hover lights the row in the
+          gutter; click the quote to jump. A repeated chorus is one note, not one per repetition,
+          and a rewrite applies to every copy.</li>
+        <li><b>Enhance</b> never edits in place: a diff, one row per rewrite, everything tickable,
+          and an Undo afterwards.</li>
+        <li style="color:var(--text-3)">Honest caveats: the dictionary is English-only, and the
+          mockup's rewrites are generated locally rather than by a model.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Try these</h3>
+      <ul>
+        <li>Open the <b>preset combo</b> and type "inst" or "bpm" — filter as you type, arrows and Enter to pick.</li>
+        <li>Rename the song — the folder path under the title updates live.</li>
+        <li>Type past 2,000 characters in Caption — counter turns red, Generate disables.</li>
+        <li>Toggle <b>Instrumental</b> — lyrics recede and Auto-write locks out.</li>
+        <li>Hit <b>Generate</b>, then <b>Clone</b> the result and generate again — same title, next take number.</li>
+        <li>Watch the <b>syllable gutter</b> as you edit a lyric line; toggle it off with the button above the field.</li>
+        <li><b>Check lyrics</b> on the shipped verse — four notes, one with a rewrite. Then <b>Enhance…</b> and apply it.</li>
+        <li>Click <b>song.md…</b> beside Generate to read the recipe the current form would write.</li>
+        <li><b>Save a copy</b> of it, edit the lyrics in any editor, then drag the file back onto the window — the parser is real, not faked.</li>
+        <li>Rename the song to <b>"third coffee!"</b> — it collides with an existing take's slug, so the path becomes <code>third-coffee-2</code>.</li>
+        <li>Gear icon → <b>Appearance</b> for System / Light / Dark.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Settled in review</h3>
+      <ul>
+        <li><b>Cover stays a tab.</b></li>
+        <li><b>A/B compare dropped.</b> The player bar is just transport and Reveal now.</li>
+        <li><b>Song Title added</b> as the first field on both Compose and Cover.</li>
+        <li><b>Presets: flat, filterable combo</b> — search box over the list, ComfyUI-style.</li>
+        <li><b>Theme follows the system</b> by default, overridable in Settings.</li>
+        <li><b>Song folder holds take subfolders</b>, with song.md at the root.</li>
+        <li><b>Missing reference audio never blocks a drop</b> — the rest of the form restores and the reference is flagged, with Locate and Continue.</li>
+        <li><b>Colliding folder slugs get <code>-2</code></b>, no prompt.</li>
+        <li><b>Recipe copied into ID3</b> for mp3 only.</li>
+        <li><b>Auto-write needs no extra key</b>, and recovers its lyrics through the free preprocess endpoint.</li>
+        <li><b>Lyric tools are offline and standalone</b> — dictionary-backed syllables, phonetic
+          rhyme, and the measured checks, with no key and no network.</li>
+        <li><b>The lyric assistant ships off</b>, behind an explicit tick plus a key in Settings.</li>
+      </ul>
+      <h3 style="margin-top:16px">Still to answer</h3>
+      <ul>
+        <li>Should lyric recovery run <b>automatically</b> after every auto-written take, or sit behind a button on the history entry?</li>
+        <li>Cover recipes also record <code>cover_feature_id</code>, which dies after 24 h. Re-run preprocess silently on restore, or show it as a step?</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- element helpers ---------- */
+  const $ = (id) => document.getElementById(id);
+  const root = document.documentElement;
+
+  /* ============================================================
+     THEME — System (default) / Light / Dark, set in Settings
+     ============================================================ */
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+  function applyTheme(mode) {
+    if (mode === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", mode);
+    requestAnimationFrame(drawAll);
+  }
+  applyTheme("system");
+  prefersDark.addEventListener("change", drawAll);
+
+  $("themeRadios").addEventListener("change", (e) => {
+    if (e.target.name === "theme") applyTheme(e.target.value);
+  });
+
+  /* ============================================================
+     WAVEFORM RENDERING
+     ============================================================ */
+  function bars(seed, n) {
+    let s = seed * 9301 + 49297;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      s = (s * 9301 + 49297) % 233280;
+      const rnd = s / 233280;
+      const env = Math.sin((i / n) * Math.PI) * 0.6 + 0.4;      // overall shape
+      const beat = 0.72 + 0.28 * Math.abs(Math.sin(i / 3.1));   // pulse
+      out.push(Math.max(0.08, rnd * env * beat));
+    }
+    return out;
+  }
+
+  function drawWave(canvas, seed, progress, opts) {
+    const o = opts || {};
+    const css = getComputedStyle(root);
+    const idle = o.mini ? css.getPropertyValue("--border-strong") : css.getPropertyValue("--surface-3");
+    const played = css.getPropertyValue("--accent");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 200;
+    const h = canvas.clientHeight || 30;
+    if (!w || !h) return;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const bw = o.mini ? 2 : 3;
+    const gap = o.mini ? 1 : 2;
+    const n = Math.max(8, Math.floor(w / (bw + gap)));
+    const data = bars(seed, n);
+    const cut = Math.floor(n * (progress || 0));
+    for (let i = 0; i < n; i++) {
+      const bh = Math.max(1.5, data[i] * (h - 2));
+      ctx.fillStyle = (i < cut ? played : idle).trim();
+      ctx.fillRect(i * (bw + gap), (h - bh) / 2, bw, bh);
+    }
+  }
+
+  function drawAll() {
+    document.querySelectorAll("canvas.hi-wave").forEach((c) => {
+      drawWave(c, Number(c.dataset.seed), 0, { mini: true });
+    });
+    if (state.current) drawWave($("playWave"), state.current.seed, state.pos / state.current.dur);
+  }
+  window.addEventListener("resize", drawAll);
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  const PRESETS = {
+    blank: { name: "Blank", desc: "empty form", title: "", cap: "", lyr: "" },
+    last: {
+      name: "Last used", desc: "acid jazz · 104 bpm", title: "Six Flights Up",
+      cap: "Acid jazz, 104 BPM, E minor. Live kit with tight ghost notes, slap bass, Rhodes comping, muted wah guitar. Warm analog mix with tape saturation. Female lead, smoky mid-range, conversational phrasing.",
+      lyr: "[Intro]\n\n[Verse]\nSix flights up and the elevator's out\n" +
+           "The city keeps its own hours anyway\nI count the neon like it owes me rent\n\n" +
+           "[Pre Chorus]\nAnd the bassline knows my name\n\n" +
+           "[Chorus]\nTill the morning gets it right\nSix more hours in the dark\n" +
+           "And I'll be gone before the light\n\n" +
+           "[Verse]\nCold coffee and a radio that only plays static after midnight\n" +
+           "Somebody's window throws a square of gold\nI take the stairs, I never take the lift\n\n" +
+           "[Chorus]\nTill the morning gets it right\nSix more hours in the dark\n" +
+           "And I'll be gone before the light\n\n[Outro]"
+    },
+    acid: {
+      name: "Acid jazz / funk", desc: "104 bpm · e minor · female lead",
+      cap: "Acid jazz, 104 BPM, E minor. Live kit with tight ghost notes, slap bass, Rhodes comping, muted wah guitar. Horn stabs on the chorus. Female lead, smoky mid-range.",
+      lyr: "[Intro]\n\n[Verse]\n\n[Chorus]\n\n[Outro]"
+    },
+    synth: {
+      name: "Neon synthwave", desc: "118 bpm · f# minor · male lead",
+      cap: "Synthwave, 118 BPM, F# minor. Gated reverb snare, arpeggiated Juno bass, wide analog pads, chorused lead. Male vocal, breathy upper register, heavy plate reverb. Long instrumental intro before the first verse.",
+      lyr: "[Intro]\n\n[Verse]\n\n[Pre Chorus]\n\n[Chorus]\n\n[Outro]"
+    },
+    folk: {
+      name: "Close-mic folk", desc: "78 bpm · d major · intimate",
+      cap: "Contemporary folk, 78 BPM, D major. Close-miked steel-string guitar, upright bass, brushed snare, single fiddle line on the chorus. Intimate room sound, minimal compression. Androgynous lead vocal, near-whisper verses.",
+      lyr: "[Verse]\n\n[Chorus]\n\n[Verse]\n\n[Outro]"
+    },
+    trailer: {
+      name: "Cinematic trailer", desc: "90→140 bpm · instrumental",
+      cap: "Cinematic trailer cue, 90 BPM building to 140, C minor. Sub hits, taiko ostinato, brass clusters, high sustained strings. Three-stage build with a full stop before the final hit. Fully instrumental.",
+      lyr: ""
+    },
+    lofi: {
+      name: "Lo-fi study loop", desc: "72 bpm · a minor · instrumental",
+      cap: "Lo-fi hip hop, 72 BPM, A minor. Dusty sampled Rhodes, vinyl crackle, swung MPC drums, upright bass. Sidechained, filtered, no vocals. Loops cleanly. Fully instrumental.",
+      lyr: ""
+    }
+  };
+
+  const TAGS = ["[Intro]","[Verse]","[Pre Chorus]","[Chorus]","[Interlude]","[Bridge]","[Outro]",
+                "[Post Chorus]","[Transition]","[Break]","[Hook]","[Build Up]","[Inst]","[Solo]"];
+
+  const SEGMENTS = [
+    { k: "Intro", w: 8 }, { k: "Verse", w: 20 }, { k: "Chorus", w: 16, kind: "chorus" },
+    { k: "Verse", w: 20 }, { k: "Chorus", w: 16, kind: "chorus" }, { k: "Bridge", w: 12 }, { k: "Outro", w: 8 }
+  ];
+
+  const state = {
+    keySaved: true,
+    takes: [],
+    current: null,
+    playing: false,
+    pos: 0,
+    preset: "last",
+    orEnabled: false,
+    orKey: "",
+    orModel: "anthropic/claude-sonnet-5",
+    findings: [],
+    flagged: {},
+    pendingDiff: [],
+    lyricUndo: null,
+    generating: false,
+    genTimer: null,
+    playTimer: null,
+    pendingGenerate: false
+  };
+
+  const SEED_TAKES = [
+    { id: 3, title: "Six Flights Up", take: 3, sub: "Acid jazz, 104 BPM, E minor — live kit, slap bass, Rhodes comping", model: "music-3.0-free", fmt: "wav", dur: 152, when: "14:22", seed: 31 },
+    { id: 2, title: "Approach Vector", take: 1, sub: "Cinematic trailer cue, C minor — taiko ostinato, brass clusters", model: "music-3.0-free", fmt: "wav", dur: 118, when: "13:48", seed: 77 },
+    { id: 1, title: "Hold On (gospel rework)", take: 2, sub: "Cover of demo-take.wav — Hammond organ, brushed kit", model: "music-cover-free", fmt: "wav", dur: 201, when: "11:05", seed: 12 },
+    { id: 0, title: "Third Coffee", take: 1, sub: "Lo-fi hip hop, 72 BPM — dusty Rhodes, vinyl crackle", model: "music-3.0-free", fmt: "mp3", dur: 96, when: "09:31", seed: 54 }
+  ];
+
+  const slugify = (s) => s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+  const takeTitle = () => $("songTitle").value.trim() || "Untitled song";
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  /* two different songs can slug to the same folder — suffix the newcomer */
+  function songSlug(title) {
+    const base = slugify(title);
+    let n = 1;
+    state.takes.forEach((t) => {
+      if (t.title !== title && slugify(t.title) === base) n = 2;
+    });
+    return n === 1 ? base : base + "-" + n;
+  }
+  const songDir = (title) => "~/MiniMaxMusic/" + songSlug(title || takeTitle()) + "/";
+  const takeDir = (title, n) => songDir(title) + "take-" + pad2(n) + "/";
+  const nextTake = (title) => state.takes.reduce((n, t) => (t.title === title ? Math.max(n, t.take) : n), 0) + 1;
+
+  const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  const clock = (s) => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+  /* ============================================================
+     TABS
+     ============================================================ */
+  document.querySelectorAll(".tab").forEach((t) => {
+    t.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
+      $("screen-" + t.dataset.screen).classList.add("is-active");
+      document.querySelector(".scroller").scrollTop = 0;
+    });
+  });
+
+  $("histBtn").addEventListener("click", () => {
+    const b = $("appBody");
+    b.dataset.history = b.dataset.history === "open" ? "closed" : "open";
+    setTimeout(drawAll, 240);
+  });
+
+  /* ============================================================
+     COUNTERS + VALIDATION
+     ============================================================ */
+  function autogrow(el) {
+    if (el.id === "coverLyrics") return;
+    el.style.height = "auto";
+    el.style.height = Math.max(el.scrollHeight, el.id === "lyrics" ? 208 : 0) + "px";
+  }
+
+  function bindCount(taId, countId, max, min) {
+    const ta = $(taId), out = $(countId);
+    const upd = () => {
+      const n = ta.value.length;
+      out.textContent = n.toLocaleString() + " / " + max.toLocaleString();
+      const bad = n > max || Boolean(min && n > 0 && n < min);
+      out.classList.toggle("over", bad);
+      autogrow(ta);
+      if (taId === "lyrics") renderGutter();
+      refreshGenerate();
+    };
+    ta.addEventListener("input", upd);
+    upd();
+  }
+
+  function refreshGenerate() {
+    const capLen = $("caption").value.length;
+    const lyrLen = $("lyrics").value.length;
+    const inst = $("swInst").getAttribute("aria-pressed") === "true";
+    const auto = $("swAuto").getAttribute("aria-pressed") === "true";
+    const tooLong = capLen > 2000 || lyrLen > 3500;
+    const needsLyrics = !inst && !auto && lyrLen === 0;
+    const needsCaption = capLen === 0;
+    $("genBtn").disabled = state.generating ? false : (tooLong || needsLyrics || needsCaption);
+  }
+
+  /* ============================================================
+     SWITCHES + PRESETS
+     ============================================================ */
+  function setSwitch(btn, on) { btn.setAttribute("aria-pressed", String(on)); }
+
+  $("swInst").addEventListener("click", () => {
+    const on = $("swInst").getAttribute("aria-pressed") !== "true";
+    setSwitch($("swInst"), on);
+    $("fieldLyrics").classList.toggle("is-muted", on);
+    $("lyrics").disabled = on;
+    document.querySelectorAll("#tags .tag").forEach((t) => (t.disabled = on));
+    $("capReq").hidden = !on;
+    if (on) setSwitch($("swAuto"), false);
+    $("swAuto").disabled = on;
+    refreshGenerate();
+  });
+
+  $("swAuto").addEventListener("click", () => {
+    if ($("swAuto").disabled) return;
+    const on = $("swAuto").getAttribute("aria-pressed") !== "true";
+    if (on && $("lyrics").value.length > 0) {
+      notice("warn", "Clear the lyrics field first — auto-write only applies when it is empty.");
+      return;
+    }
+    setSwitch($("swAuto"), on);
+    $("lyrics").placeholder = on
+      ? "MiniMax writes these from your caption, inside the same request.\nThe words are sung but never returned as text — see below."
+      : "[Verse]\nOne line per line. Section tags above insert at the cursor.";
+    $("autoNote").hidden = !on;
+    refreshGenerate();
+  });
+
+  /* ---------- song title ---------- */
+  function syncSlug() {
+    const t = takeTitle();
+    $("titleSlug").textContent = takeDir(t, nextTake(t));
+  }
+  $("songTitle").addEventListener("input", syncSlug);
+
+  /* ---------- preset combo: filter + list ---------- */
+  const combo = $("presetCombo");
+  const KEYS = ["last", "blank", "acid", "synth", "folk", "trailer", "lofi"];
+  let activeIdx = 0;
+
+  function renderPresetList() {
+    const q = $("presetSearch").value.trim().toLowerCase();
+    const list = $("presetList");
+    const hits = KEYS.filter((k) => {
+      const p = PRESETS[k];
+      return !q || (p.name + " " + (p.desc || "") + " " + p.cap).toLowerCase().includes(q);
+    });
+    list.innerHTML = "";
+    if (!hits.length) {
+      list.innerHTML = '<div class="combo-none">No preset matches that.</div>';
+      return;
+    }
+    activeIdx = Math.min(activeIdx, hits.length - 1);
+    hits.forEach((k, i) => {
+      const p = PRESETS[k];
+      const b = document.createElement("button");
+      b.className = "combo-opt" + (i === activeIdx ? " is-active" : "");
+      b.type = "button";
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", String(k === state.preset));
+      b.innerHTML = '<span class="on">' + p.name + "</span>" +
+                    (p.desc ? '<span class="od">' + p.desc + "</span>" : "");
+      b.addEventListener("click", () => choosePreset(k));
+      list.appendChild(b);
+    });
+    list.dataset.hits = hits.join(",");
+  }
+
+  function openCombo() {
+    combo.dataset.open = "true";
+    $("presetBtn").setAttribute("aria-expanded", "true");
+    $("presetSearch").value = "";
+    activeIdx = 0;
+    renderPresetList();
+    $("presetSearch").focus();
+  }
+  function closeCombo() {
+    combo.dataset.open = "false";
+    $("presetBtn").setAttribute("aria-expanded", "false");
+  }
+
+  function choosePreset(k) {
+    const p = PRESETS[k];
+    if (!p) return;
+    state.preset = k;
+    $("presetLabel").textContent = p.name;
+    if (p.title !== undefined) $("songTitle").value = p.title;
+    $("caption").value = p.cap;
+    $("lyrics").value = p.lyr;
+    const wantsInst = !p.lyr && p.cap.indexOf("instrumental") !== -1;
+    if (wantsInst !== ($("swInst").getAttribute("aria-pressed") === "true")) $("swInst").click();
+    $("caption").dispatchEvent(new Event("input"));
+    $("lyrics").dispatchEvent(new Event("input"));
+    syncSlug();
+    closeCombo();
+    $("presetBtn").focus();
+  }
+
+  $("presetBtn").addEventListener("click", () => {
+    combo.dataset.open === "true" ? closeCombo() : openCombo();
+  });
+  $("presetSearch").addEventListener("input", () => { activeIdx = 0; renderPresetList(); });
+  $("presetSearch").addEventListener("keydown", (e) => {
+    const hits = ($("presetList").dataset.hits || "").split(",").filter(Boolean);
+    if (e.key === "ArrowDown") { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, hits.length - 1); renderPresetList(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); renderPresetList(); }
+    else if (e.key === "Enter") { e.preventDefault(); if (hits[activeIdx]) choosePreset(hits[activeIdx]); }
+    else if (e.key === "Escape") { e.preventDefault(); closeCombo(); $("presetBtn").focus(); }
+  });
+  document.addEventListener("click", (e) => {
+    if (combo.dataset.open === "true" && !combo.contains(e.target)) closeCombo();
+  });
+
+  /* recover model-written lyrics by running the finished track back through
+     music_cover_preprocess, which is free and returns ASR'd formatted_lyrics */
+  $("recoverLyrics").addEventListener("click", () => {
+    notice("info", "<strong>After the take lands, the track is sent to <code>music_cover_preprocess</code></strong> — " +
+      "the free step from the Cover flow. It returns <code>formatted_lyrics</code>, transcribed with section tags, " +
+      "which are written into <code>song.md</code> and the lyrics field. Costs nothing and closes the reproducibility hole.");
+  });
+
+  $("editPresets").addEventListener("click", () =>
+    notice("info", "Opens presets.json in the app data folder — presets are plain JSON you can edit or share."));
+
+  /* ---------- structure tags ---------- */
+  const tagWrap = $("tags");
+  TAGS.forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "tag";
+    b.type = "button";
+    b.textContent = t;
+    b.addEventListener("click", () => {
+      const ta = $("lyrics");
+      const s = ta.selectionStart, e = ta.selectionEnd;
+      const before = ta.value.slice(0, s);
+      const ins = (before && !before.endsWith("\n") ? "\n" : "") + t + "\n";
+      ta.value = before + ins + ta.value.slice(e);
+      const caret = s + ins.length;
+      ta.focus();
+      ta.setSelectionRange(caret, caret);
+      ta.dispatchEvent(new Event("input"));
+    });
+    tagWrap.appendChild(b);
+  });
+
+  /* ============================================================
+     LYRIC TOOLS
+     Syllables and rhyme are computed locally — no key, no network.
+     Check and Enhance are the only things that need a text model.
+     ============================================================ */
+  const OR_MODELS = [
+    { id: "anthropic/claude-sonnet-5", desc: "fast, strong on verse — recommended" },
+    { id: "anthropic/claude-opus-5", desc: "most capable, slower" },
+    { id: "anthropic/claude-haiku-4.5", desc: "cheapest, fine for syllable fixes" },
+    { id: "openai/gpt-5", desc: "alternative house style" },
+    { id: "meta-llama/llama-3.3-70b-instruct", desc: "open weights" }
+  ];
+
+  /* ---------- pronunciation dictionary ----------
+     The shipping app bundles the full CMU Pronouncing Dictionary (~134k words,
+     a few hundred KB, offline). This sketch carries the words in the demo lyrics
+     plus the classic spelling traps, and falls back to the spelling heuristic —
+     shown as ~n in the gutter — for anything it doesn't know.
+     Syllables = one per stressed vowel. Rhyme = the rime, from the last stressed
+     vowel to the end, compared as sound rather than as letters. */
+  const CMU = {
+    six: "S IH1 K S", flights: "F L AY1 T S", up: "AH1 P", and: "AE1 N D", the: "DH AH0",
+    "elevator's": "EH1 L AH0 V EY2 T ER0 Z", out: "AW1 T", city: "S IH1 T IY0",
+    keeps: "K IY1 P S", its: "IH1 T S", own: "OW1 N", hours: "AW1 ER0 Z",
+    anyway: "EH1 N IY0 W EY2", i: "AY1", count: "K AW1 N T", neon: "N IY1 AA0 N",
+    like: "L AY1 K", it: "IH1 T", owes: "OW1 Z", me: "M IY1", rent: "R EH1 N T",
+    bassline: "B EY1 S L AY2 N", knows: "N OW1 Z", my: "M AY1", name: "N EY1 M",
+    till: "T IH1 L", morning: "M AO1 R N IH0 NG", gets: "G EH1 T S", right: "R AY1 T",
+    more: "M AO1 R", in: "IH0 N", dark: "D AA1 R K", "i'll": "AY1 L", be: "B IY1",
+    gone: "G AO1 N", before: "B IH0 F AO1 R", light: "L AY1 T", cold: "K OW1 L D",
+    coffee: "K AO1 F IY0", a: "AH0", radio: "R EY1 D IY0 OW2", that: "DH AE1 T",
+    only: "OW1 N L IY0", plays: "P L EY1 Z", playing: "P L EY1 IH0 NG",
+    static: "S T AE1 T IH0 K", after: "AE1 F T ER0", midnight: "M IH1 D N AY2 T",
+    "somebody's": "S AH1 M B AA2 D IY0 Z", window: "W IH1 N D OW0", throws: "TH R OW1 Z",
+    square: "S K W EH1 R", of: "AH1 V", gold: "G OW1 L D", take: "T EY1 K",
+    stairs: "S T EH1 R Z", never: "N EH1 V ER0", lift: "L IH1 F T",
+    /* the cases where spelling lies about sound */
+    love: "L AH1 V", glove: "G L AH1 V", move: "M UW1 V", prove: "P R UW1 V",
+    eight: "EY1 T", gate: "G EY1 T", weight: "W EY1 T", late: "L EY1 T",
+    /* common words, so ~ marks the genuinely unusual rather than every line */
+    nothing: "N AH1 TH IH0 NG", could: "K UH1 D", ever: "EH1 V ER0",
+    something: "S AH1 M TH IH0 NG", hand: "HH AE1 N D", inside: "IH2 N S AY1 D",
+    everything: "EH1 V R IY0 TH IH0 NG", had: "HH AE1 D", to: "T UW1",
+    counting: "K AW1 N T IH0 NG", down: "D AW1 N", from: "F R AH1 M",
+    standing: "S T AE1 N D IH0 NG", at: "AE1 T", carrying: "K AE1 R IY0 IH0 NG",
+    always: "AO1 L W EY2 Z", running: "R AH1 N IH0 NG", is: "IH1 Z", you: "Y UW1",
+    we: "W IY1", this: "DH IH1 S", with: "W IH1 DH", "for": "F AO1 R", on: "AA1 N",
+    but: "B AH1 T", so: "S OW1", all: "AO1 L", no: "N OW1", one: "W AH1 N",
+    time: "T AY1 M", night: "N AY1 T", day: "D EY1", know: "N OW1", go: "G OW1",
+    back: "B AE1 K", wait: "W EY1 T", stay: "S T EY1", way: "W EY1", home: "HH OW1 M",
+    heart: "HH AA1 R T", hold: "HH OW1 L D", room: "R UW1 M", run: "R AH1 N"
+  };
+
+  const clean = (w) => w.toLowerCase().replace(/[^a-z']/g, "").replace(/^'+|'+$/g, "");
+
+  /* fallback when a word isn't in the dictionary: count vowel groups */
+  function guessSyllables(w) {
+    if (!w) return 0;
+    if (w.length <= 3) return 1;
+    const s = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "").replace(/^y/, "");
+    const m = s.match(/[aeiouy]{1,2}/g);
+    return m ? m.length : 1;
+  }
+
+  const stressCount = (ph) => (ph.match(/\d/g) || []).length;
+
+  /* measure a line; `exact` is false if any word fell back to the heuristic */
+  function measureLine(line) {
+    let syl = 0;
+    let exact = true;
+    line.split(/\s+/).filter(Boolean).forEach((raw) => {
+      const w = clean(raw);
+      if (!w) return;
+      if (CMU[w]) { syl += stressCount(CMU[w]); return; }
+      exact = false;
+      syl += guessSyllables(w);
+    });
+    return { syl: syl, exact: exact };
+  }
+  const lineSyllables = (line) => measureLine(line).syl;
+
+  /* the rime: last stressed vowel to the end, stress marks stripped */
+  function rime(ph) {
+    const parts = ph.split(" ");
+    let at = -1;
+    for (let i = 0; i < parts.length; i++) if (/[12]/.test(parts[i])) at = i;
+    if (at < 0) for (let i = 0; i < parts.length; i++) if (/\d/.test(parts[i])) at = i;
+    if (at < 0) return null;
+    return parts.slice(at).join(" ").replace(/\d/g, "");
+  }
+
+  function rhymeKey(line) {
+    const words = line.split(/\s+/).map(clean).filter(Boolean);
+    if (!words.length) return null;
+    const w = words[words.length - 1];
+    if (CMU[w]) return rime(CMU[w]);
+    const m = w.match(/[aeiouy]+[^aeiouy]*$/);      // spelling fallback
+    return m ? "~" + m[0] : "~" + w.slice(-2);
+  }
+
+  const isTagLine = (s) => /^\s*\[[^\]]+\]\s*$/.test(s);
+
+  function analyzeLyrics(text) {
+    const src = text.split("\n");
+    const lines = [];
+    const sections = [];
+    let cur = null;
+
+    const seenName = {};
+    src.forEach((line, i) => {
+      if (isTagLine(line)) {
+        const name = line.trim().replace(/[[\]]/g, "");
+        seenName[name] = (seenName[name] || 0) + 1;
+        cur = { name: name, nth: seenName[name], idx: [] };
+        sections.push(cur);
+        lines.push({ i: i, text: line, isTag: true });
+        return;
+      }
+      if (!line.trim()) { lines.push({ i: i, text: line, blank: true }); return; }
+      if (!cur) { cur = { name: null, nth: 1, idx: [] }; sections.push(cur); }
+      cur.idx.push(i);
+      const m = measureLine(line);
+      lines.push({
+        i: i, text: line, syl: m.syl, exact: m.exact, key: rhymeKey(line),
+        sec: cur.name, nth: cur.nth, pos: cur.idx.length
+      });
+    });
+
+    /* a name that appears more than once needs its occurrence number to be unambiguous */
+    const total = {};
+    sections.forEach((s) => { if (s.name) total[s.name] = (total[s.name] || 0) + 1; });
+    lines.forEach((l) => { if (l.sec) l.repeats = total[l.sec] > 1; });
+
+    /* rhyme letters, assigned per section so A means the same thing locally */
+    sections.forEach((s) => {
+      const counts = {};
+      s.idx.forEach((i) => { const k = lines[i].key; if (k) counts[k] = (counts[k] || 0) + 1; });
+      const letters = {};
+      let next = 0;
+      s.idx.forEach((i) => {
+        const k = lines[i].key;
+        if (k && counts[k] > 1) {
+          if (!(k in letters)) letters[k] = String.fromCharCode(65 + next++);
+          lines[i].rhyme = letters[k];
+        } else {
+          lines[i].rhyme = "·";
+        }
+      });
+    });
+
+    return { lines: lines, sections: sections };
+  }
+
+  /* how a musician would name the spot — never a raw line number */
+  function anchorLabel(l) {
+    if (!l || !l.sec) return "line " + ((l ? l.i : 0) + 1);
+    return l.sec + (l.repeats ? " " + l.nth : "") + " · line " + l.pos;
+  }
+
+  /* ---------- gutter ---------- */
+  function renderGutter(flagged) {
+    const g = $("lyricGutter");
+    if (!g.classList.contains("is-on")) return;
+    const a = analyzeLyrics($("lyrics").value);
+    const flags = flagged || state.flagged || {};
+    g.innerHTML = "";
+    a.lines.forEach((l) => {
+      const row = document.createElement("div");
+      row.className = "g" + (flags[l.i] ? " flag" : "") + (l.rhyme && l.rhyme !== "·" ? " rhymed" : "");
+      if (!l.isTag && !l.blank) {
+        row.innerHTML = '<span class="syl' + (l.exact ? "" : " approx") + '" title="' +
+          (l.exact ? "from the pronunciation dictionary" : "estimated — word not in the dictionary") +
+          '">' + (l.exact ? "" : "~") + l.syl + '</span><span class="rh">' + l.rhyme + "</span>";
+      }
+      g.appendChild(row);
+    });
+  }
+
+  $("gutterBtn").addEventListener("click", () => {
+    const g = $("lyricGutter");
+    const on = !g.classList.contains("is-on");
+    g.classList.toggle("is-on", on);
+    $("gutterBtn").classList.toggle("on", on);
+    $("gutterBtn").setAttribute("aria-pressed", String(on));
+    renderGutter();
+  });
+
+  /* ---------- findings ---------- */
+  const TRIMS = [
+    [/^(And|But|So|Then|Just|Well|Now)\s+/i, ""],
+    [/\bthe\s+/i, ""],
+    [/\bthat\s+/i, ""],
+    [/\breally\s+/i, ""],
+    [/\bjust\s+/i, ""]
+  ];
+
+  /* A real model returns a rewrite per finding. The mockup ships hand-written
+     rewrites for the demo lyrics and falls back to a mechanical trim elsewhere. */
+  const DEMO_REWRITES = {
+    "Cold coffee and a radio that only plays static after midnight":
+      "Cold coffee and a radio playing static",
+    "I count the neon like it owes me something":
+      "I count the neon like it owes me"
+  };
+
+  function trimLine(line, target) {
+    if (DEMO_REWRITES[line.trim()]) return DEMO_REWRITES[line.trim()];
+    let out = line;
+    TRIMS.forEach((t) => {
+      if (lineSyllables(out) <= target) return;
+      const next = out.replace(t[0], t[1]).replace(/\s{2,}/g, " ").trim();
+      if (next && next !== out) out = next;
+    });
+    return lineSyllables(out) < lineSyllables(line) ? out : null;
+  }
+
+  function buildFindings(a) {
+    const f = [];
+    const byName = {};
+    a.sections.forEach((s) => { (byName[s.name] = byName[s.name] || []).push(s); });
+
+    /* parallel lines across same-named sections should scan alike */
+    Object.keys(byName).forEach((name) => {
+      const group = byName[name];
+      if (group.length < 2) return;
+      const depth = Math.min.apply(null, group.map((s) => s.idx.length));
+      for (let p = 0; p < depth; p++) {
+        const counts = group.map((s) => a.lines[s.idx[p]].syl);
+        const min = Math.min.apply(null, counts);
+        const max = Math.max.apply(null, counts);
+        if (max - min < 3) continue;
+        const at = group[counts.indexOf(max)].idx[p];
+        f.push({
+          line: at, sev: "hard", kind: "meter",
+          note: "Line " + (p + 1) + " of this " + name + " runs " + max + " syllables against " +
+                min + " in the other " + name + ". Parallel lines that drift by three or more " +
+                "are hard to sing to the same phrase.",
+          suggestion: trimLine(a.lines[at].text, min + 1)
+        });
+      }
+    });
+
+    /* an unrhymed line inside an otherwise rhyming section */
+    a.sections.forEach((s) => {
+      const rhymed = s.idx.filter((i) => a.lines[i].rhyme !== "·");
+      if (rhymed.length < 2) return;
+      s.idx.filter((i) => a.lines[i].rhyme === "·").forEach((i) => {
+        f.push({
+          line: i, sev: "soft", kind: "rhyme",
+          note: "No rhyme partner, in a section where the other lines pair up. Reads as a dropped " +
+                "stitch unless the break is deliberate.",
+          suggestion: null
+        });
+      });
+    });
+
+    /* one breath, one line */
+    a.sections.forEach((s) => s.idx.forEach((i) => {
+      if (a.lines[i].syl <= 13) return;
+      f.push({
+        line: i, sev: "soft", kind: "phrasing",
+        note: a.lines[i].syl + " syllables is a long phrase to land in one breath at most tempos.",
+        suggestion: trimLine(a.lines[i].text, 12)
+      });
+    }));
+
+    return f;
+  }
+
+  /* The craft layer — the only part of Check that genuinely needs a model.
+     Faked here against the demo lines; a real call returns these per line. */
+  const MODEL_NOTES = {
+    "Till the morning gets it right": {
+      kind: "imagery",
+      note: "“gets it right” lands on sound rather than on anything the listener can see. " +
+            "It's carrying the rhyme, not an image — the rest of the song is concrete (six flights, " +
+            "neon, a square of gold) and this line isn't."
+    },
+    "And I'll be gone before the light": {
+      kind: "cliché",
+      note: "“before the light” is well-worn as a closing image. You've already established " +
+            "a stairwell and a lit window; something from that world would land harder."
+    },
+    "Six flights up and the elevator's out": {
+      kind: "prosody",
+      note: "Natural stress falls on “SIX” and “EL-evator”, but at 104 BPM the third " +
+            "downbeat arrives mid-word. Singable, but you'll fight it in the booth."
+    }
+  };
+
+  function modelNotes(a) {
+    const out = [];
+    a.lines.forEach((l) => {
+      if (l.isTag || l.blank) return;
+      const m = MODEL_NOTES[l.text.trim()];
+      if (m) out.push({ line: l.i, sev: "soft", kind: m.kind, note: m.note, suggestion: null, src: "model" });
+    });
+    return out;
+  }
+
+  function renderFindings(list) {
+    const box = $("findings");
+    box.innerHTML = "";
+    state.flagged = {};
+    list.forEach((f) => { if (f.sev === "hard") state.flagged[f.line] = true; });
+    renderGutter();
+
+    const a = analyzeLyrics($("lyrics").value);
+    const fromModel = list.filter((f) => f.src === "model").length;
+
+    const head = document.createElement("div");
+    head.className = "findings-head";
+    head.innerHTML = "Check · " + list.length + " note" + (list.length === 1 ? "" : "s") +
+      '<span class="by">' + (fromModel
+        ? (list.length - fromModel) + " measured · " + fromModel + " from " + $("orModelLabel").textContent
+        : "measured locally — no model connected") + "</span>";
+    box.appendChild(head);
+
+    if (!list.length) {
+      const ok = document.createElement("div");
+      ok.className = "findings-empty";
+      ok.textContent = "Nothing to flag. Meter holds across parallel lines, every rhyme lands, and no line runs long.";
+      box.appendChild(ok);
+      return;
+    }
+
+    list.forEach((f) => {
+      const l = a.lines[f.line];
+      const d = document.createElement("div");
+      d.className = "finding";
+      d.dataset.sev = f.sev;
+      d.innerHTML =
+        '<div class="f-body">' +
+          '<div class="f-head"><span class="anchor">' + anchorLabel(l) +
+            (f.alsoAt && f.alsoAt.length
+              ? " + " + f.alsoAt.map((n) => anchorLabel(a.lines[n]).split(" · ")[0]).join(", ")
+              : "") + "</span>" +
+            '<span class="kind">' + f.kind + "</span>" +
+            (f.src === "model" ? '<span class="by">' + $("orModelLabel").textContent + "</span>" : "") +
+          "</div>" +
+          '<div class="f-quote" title="Jump to this line">' + (l ? l.text.trim() : "") + "</div>" +
+          '<div class="f-note">' + f.note + "</div>" +
+          (f.suggestion ? '<div class="sugg">' + f.suggestion + "</div>" : "") +
+        "</div>" +
+        (f.suggestion ? '<button class="mini-btn" data-apply="1">Apply</button>' : "<span></span>");
+
+      d.querySelector(".f-quote").addEventListener("click", () => selectLine(f.line));
+      const rows = [f.line].concat(f.alsoAt || []);
+      d.addEventListener("mouseenter", () => rows.forEach((n) => highlightRow(n, true)));
+      d.addEventListener("mouseleave", () => rows.forEach((n) => highlightRow(n, false)));
+      const btn = d.querySelector("[data-apply]");
+      if (btn) btn.addEventListener("click", () => { applyRewrites([f]); runCheck(true); });
+      box.appendChild(d);
+    });
+  }
+
+  /* A repeated chorus is one note, not one per repetition. Collapse findings that
+     share a kind and an identical line, and remember the other places it lands. */
+  function collapseFindings(list, a) {
+    const byKey = {};
+    const out = [];
+    list.forEach((f) => {
+      const l = a.lines[f.line];
+      const key = f.kind + " " + (l ? l.text.trim() : f.line);
+      if (byKey[key]) { byKey[key].alsoAt.push(f.line); return; }
+      byKey[key] = Object.assign({}, f, { alsoAt: [] });
+      out.push(byKey[key]);
+    });
+    return out;
+  }
+
+  /* hovering a finding lights its row in the gutter — the anchor, without numbering */
+  function highlightRow(n, on) {
+    const row = $("lyricGutter").children[n];
+    if (row) row.classList.toggle("hi", on);
+  }
+
+  function selectLine(n) {
+    const ta = $("lyrics");
+    const lines = ta.value.split("\n");
+    const start = lines.slice(0, n).reduce((s, l) => s + l.length + 1, 0);
+    ta.focus();
+    ta.setSelectionRange(start, start + lines[n].length);
+  }
+
+  function applyRewrites(list) {
+    const ta = $("lyrics");
+    state.lyricUndo = ta.value;
+    const lines = ta.value.split("\n");
+    list.forEach((f) => {
+      if (!f.suggestion) return;
+      lines[f.line] = f.suggestion;
+      (f.alsoAt || []).forEach((n) => { lines[n] = f.suggestion; });   // repeats stay in sync
+    });
+    ta.value = lines.join("\n");
+    ta.dispatchEvent(new Event("input"));
+  }
+
+  /* ---------- check / enhance ---------- */
+  const assistantOn = () => Boolean(state.orEnabled && state.orKey);
+
+  function needsModel() {
+    if (assistantOn()) return false;
+    openModal();
+    $("orEnable").focus();
+    notice("info", "<strong>The lyric assistant is off.</strong> Rewrites and craft notes are the " +
+      "only parts that call out to a model — tick <em>Enable</em> in Settings and add an OpenRouter " +
+      "key. Syllables, rhyme and the measured checks keep working either way.");
+    return true;
+  }
+
+  /* The measured checks are arithmetic over syllables and rhyme — they run with no
+     key and no network. A connected model only adds the craft layer on top. */
+  function runCheck(quiet) {
+    const a = analyzeLyrics($("lyrics").value);
+    const measured = collapseFindings(buildFindings(a), a);
+
+    if (!assistantOn()) {
+      state.findings = measured;
+      renderFindings(measured);
+      return;
+    }
+    if (!quiet) {
+      $("checkBtn").disabled = true;
+      $("checkBtn").textContent = "Checking…";
+      renderFindings(measured);          // measured results land instantly
+    }
+    const go = () => {
+      $("checkBtn").disabled = false;
+      $("checkBtn").textContent = "Check lyrics";
+      state.findings = measured.concat(collapseFindings(modelNotes(a), a));
+      renderFindings(state.findings);
+    };
+    quiet ? go() : setTimeout(go, 1100);
+  }
+
+  $("checkBtn").addEventListener("click", () => runCheck(false));
+
+  $("enhanceBtn").addEventListener("click", () => {
+    if (needsModel()) return;
+    const a2 = analyzeLyrics($("lyrics").value);
+    const seen = {};
+    const list = collapseFindings(buildFindings(a2), a2).filter((f) => {
+      if (!f.suggestion || seen[f.line]) return false;   // one rewrite per line
+      seen[f.line] = true;
+      return true;
+    });
+    if (!list.length) {
+      notice("info", "No rewrites to propose — every line the check flags needs a judgement call " +
+        "you'd want to make yourself. Run <strong>Check lyrics</strong> to read the notes.");
+      return;
+    }
+    state.pendingDiff = list;
+    const box = $("diffList");
+    box.innerHTML = "";
+    const src = $("lyrics").value.split("\n");
+    list.forEach((f, n) => {
+      const row = document.createElement("div");
+      row.className = "diff-row";
+      row.innerHTML =
+        '<input type="checkbox" checked data-n="' + n + '">' +
+        '<div class="ln">L' + (f.line + 1) + "</div>" +
+        '<div><div class="was">' + src[f.line] + '</div><div class="now">' + f.suggestion + "</div>" +
+          '<div class="why">' + f.kind + " — " + f.note.split(".")[0] + ".</div></div>";
+      box.appendChild(row);
+    });
+    $("diffScrim").classList.add("is-on");
+  });
+
+  $("diffNone").addEventListener("click", () => {
+    document.querySelectorAll("#diffList input").forEach((c) => (c.checked = false));
+  });
+  $("diffCancel").addEventListener("click", () => $("diffScrim").classList.remove("is-on"));
+  $("diffScrim").addEventListener("click", (e) => {
+    if (e.target === $("diffScrim")) $("diffScrim").classList.remove("is-on");
+  });
+  $("diffApply").addEventListener("click", () => {
+    const picked = [];
+    document.querySelectorAll("#diffList input").forEach((c) => {
+      if (c.checked) picked.push(state.pendingDiff[Number(c.dataset.n)]);
+    });
+    $("diffScrim").classList.remove("is-on");
+    if (!picked.length) return;
+    applyRewrites(picked);
+    runCheck(true);
+    const d = notice("info", "Applied " + picked.length + " rewrite" + (picked.length === 1 ? "" : "s") +
+      '. <button class="btn" id="undoEnhance" style="margin-left:8px">Undo</button>');
+    d.querySelector("#undoEnhance").addEventListener("click", () => {
+      if (state.lyricUndo === null) return;
+      $("lyrics").value = state.lyricUndo;
+      $("lyrics").dispatchEvent(new Event("input"));
+      state.lyricUndo = null;
+      runCheck(true);
+      notice("info", "Reverted to your lyrics.");
+    });
+  });
+
+  /* ---------- OpenRouter key + model picker ---------- */
+  const orCombo = $("modelCombo");
+  function renderOrModels() {
+    const q = $("orModelSearch").value.trim().toLowerCase();
+    const list = $("orModelList");
+    const hits = OR_MODELS.filter((m) => !q || (m.id + " " + m.desc).toLowerCase().includes(q));
+    list.innerHTML = "";
+    if (q && !hits.some((m) => m.id === q)) {
+      const b = document.createElement("button");
+      b.className = "combo-opt";
+      b.type = "button";
+      b.innerHTML = '<span class="on">' + $("orModelSearch").value.trim() + '</span><span class="od">use this ID as typed</span>';
+      b.addEventListener("click", () => pickOrModel($("orModelSearch").value.trim()));
+      list.appendChild(b);
+    }
+    hits.forEach((m) => {
+      const b = document.createElement("button");
+      b.className = "combo-opt";
+      b.type = "button";
+      b.setAttribute("aria-selected", String(m.id === state.orModel));
+      b.innerHTML = '<span class="on">' + m.id + '</span><span class="od">' + m.desc + "</span>";
+      b.addEventListener("click", () => pickOrModel(m.id));
+      list.appendChild(b);
+    });
+  }
+  function pickOrModel(id) {
+    state.orModel = id;
+    $("orModelLabel").textContent = id;
+    orCombo.dataset.open = "false";
+    $("orModelBtn").setAttribute("aria-expanded", "false");
+  }
+  $("orModelBtn").addEventListener("click", () => {
+    const open = orCombo.dataset.open !== "true";
+    orCombo.dataset.open = String(open);
+    $("orModelBtn").setAttribute("aria-expanded", String(open));
+    if (open) { $("orModelSearch").value = ""; renderOrModels(); $("orModelSearch").focus(); }
+  });
+  $("orModelSearch").addEventListener("input", renderOrModels);
+  document.addEventListener("click", (e) => {
+    if (orCombo.dataset.open === "true" && !orCombo.contains(e.target)) orCombo.dataset.open = "false";
+  });
+
+  function syncLyricTools() {
+    const on = assistantOn();
+    $("checkBtn").title = on
+      ? "Measured checks from the dictionary, plus craft notes from " + state.orModel
+      : "Measured checks from the bundled pronunciation dictionary — entirely offline";
+    $("enhanceBtn").classList.toggle("is-off", !on);
+    $("enhanceTag").hidden = on;
+    $("enhanceBtn").title = on ? "Rewrites from " + state.orModel : "Lyric assistant is off — enable it in Settings";
+    $("orKeyWrap").classList.toggle("is-locked", !state.orEnabled);
+    $("orModelWrap").classList.toggle("is-locked", !state.orEnabled);
+  }
+
+  $("orEnable").addEventListener("change", (e) => {
+    state.orEnabled = e.target.checked;
+    if (!state.orEnabled) state.orKey = "";
+    syncLyricTools();
+  });
+
+  /* ============================================================
+     RECIPE — song.md: YAML front matter + caption/lyrics body
+     ============================================================ */
+  const yamlStr = (s) => (/[:#\-\[\]{}]|^\s|\s$/.test(s) ? '"' + s.replace(/"/g, '\\"') + '"' : s);
+
+  function buildRecipe() {
+    const inst = $("swInst").getAttribute("aria-pressed") === "true";
+    const auto = $("swAuto").getAttribute("aria-pressed") === "true";
+    const fmt = $("format").value;
+    const lines = [
+      "---",
+      "minimax_music: 1",
+      "title: " + yamlStr(takeTitle()),
+      "created: 2026-08-16T14:22:05Z",
+      "model: " + $("model").value,
+      "instrumental: " + inst,
+      "lyrics_optimizer: " + auto,
+      "audio:",
+      "  format: " + fmt,
+      "  sample_rate: " + $("rate").value
+    ];
+    if (fmt === "mp3") lines.push("  bitrate: " + $("bitrate").value);
+    lines.push("---", "", "## Caption", "", $("caption").value.trim() || "(none)");
+    if (!inst) {
+      lines.push("", "## Lyrics", "");
+      lines.push(auto && !$("lyrics").value.trim()
+        ? "(written by the model — the API returns audio only, so these words are not recorded)"
+        : ($("lyrics").value.trim() || "(none)"));
+    }
+    return lines.join("\n") + "\n";
+  }
+
+  function highlight(md) {
+    return md
+      .replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]))
+      .replace(/^(---)$/gm, '<span class="d">$1</span>')
+      .replace(/^(\s*)([a-z0-9_]+)(:)/gm, '$1<span class="k">$2</span><span class="d">$3</span>')
+      .replace(/^(## .*)$/gm, '<span class="h">$1</span>')
+      .replace(/^(\[[A-Za-z ]+\])$/gm, '<span class="t">$1</span>');
+  }
+
+  function showRecipe() {
+    $("recipePre").innerHTML = highlight(buildRecipe());
+    $("recipePath").textContent = songDir() + "song.md";
+    $("recipeScrim").classList.add("is-on");
+  }
+  $("recipeBtn").addEventListener("click", showRecipe);
+  $("recipeClose").addEventListener("click", () => $("recipeScrim").classList.remove("is-on"));
+  $("recipeScrim").addEventListener("click", (e) => {
+    if (e.target === $("recipeScrim")) $("recipeScrim").classList.remove("is-on");
+  });
+  $("recipeCopy").addEventListener("click", () => {
+    navigator.clipboard.writeText(buildRecipe()).then(
+      () => { $("recipeCopy").textContent = "Copied"; setTimeout(() => ($("recipeCopy").textContent = "Copy"), 1400); },
+      () => { $("recipeCopy").textContent = "Blocked"; setTimeout(() => ($("recipeCopy").textContent = "Copy"), 1400); }
+    );
+  });
+  $("recipeSave").addEventListener("click", () => {
+    const blob = new Blob([buildRecipe()], { type: "text/markdown" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = songSlug(takeTitle()) + ".song.md";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  /* ---------- parse a recipe back into the form ---------- */
+  function parseRecipe(text) {
+    const out = { audio: {} };
+    let body = text;
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    if (fm) {
+      body = fm[2];
+      let block = null;
+      fm[1].split(/\r?\n/).forEach((line) => {
+        if (!line.trim()) return;
+        const nested = /^\s+([a-z0-9_]+):\s*(.+)$/.exec(line);
+        const top = /^([a-z0-9_]+):\s*(.*)$/.exec(line);
+        if (nested && block) out[block][nested[1]] = unquote(nested[2]);
+        else if (top) {
+          if (top[2] === "") { block = top[1]; out[block] = out[block] || {}; }
+          else { out[top[1]] = unquote(top[2]); block = null; }
+        }
+      });
+    }
+    out.caption = section(body, "Caption");
+    out.lyrics = section(body, "Lyrics");
+    return out;
+  }
+  const unquote = (v) => v.replace(/^"(.*)"$/, "$1").trim();
+
+  function section(body, name) {
+    const re = new RegExp("^##\\s+" + name + "\\s*$", "mi");
+    const at = body.search(re);
+    if (at < 0) return null;
+    const rest = body.slice(at).split(/\r?\n/).slice(1).join("\n");
+    const next = rest.search(/^##\s+/m);
+    const txt = (next < 0 ? rest : rest.slice(0, next)).trim();
+    /* a single parenthesised line is a placeholder, not content */
+    return /^\([^\n]*\)$/.test(txt) ? "" : txt;
+  }
+
+  function applyRecipe(r, source) {
+    if (r.title) $("songTitle").value = r.title;
+    if (r.caption !== null && r.caption !== undefined) $("caption").value = r.caption;
+    if (r.lyrics !== null && r.lyrics !== undefined) $("lyrics").value = r.lyrics;
+
+    const wantInst = r.instrumental === "true";
+    if (wantInst !== ($("swInst").getAttribute("aria-pressed") === "true")) $("swInst").click();
+    const wantAuto = r.lyrics_optimizer === "true";
+    if (!wantInst && wantAuto !== ($("swAuto").getAttribute("aria-pressed") === "true")) $("swAuto").click();
+
+    if (r.model && [...$("model").options].some((o) => o.value === r.model)) $("model").value = r.model;
+    if (r.audio.format) $("format").value = r.audio.format;
+    if (r.audio.sample_rate) $("rate").value = r.audio.sample_rate;
+    if (r.audio.bitrate) $("bitrate").value = r.audio.bitrate;
+    $("format").dispatchEvent(new Event("change"));
+
+    state.preset = null;
+    $("presetLabel").textContent = r.title ? r.title + " (recipe)" : "From recipe";
+    $("caption").dispatchEvent(new Event("input"));
+    $("lyrics").dispatchEvent(new Event("input"));
+    syncSlug();
+
+    if (r.cover && r.cover.reference_sha256) {
+      flagReference(source, r.cover);
+    } else {
+      notice("info", "Restored from <code>" + source + "</code> — title, caption, lyrics, model, format and both flags.");
+    }
+  }
+
+  /* a cover recipe names its reference by hash; restore the rest either way */
+  function flagReference(source, cover) {
+    const short = cover.reference_sha256.slice(0, 12) + "…";
+    const why = cover.state === "mismatch"
+      ? "<code>" + cover.reference_file + "</code> is there, but its SHA-256 does not match the recipe — the file has been re-encoded or edited since."
+      : "<code>" + cover.reference_file + "</code> is not in the library or at its recorded path.";
+    const d = notice("warn",
+      "<strong>Restored without the reference audio.</strong> Title, style prompt, lyrics, model and format all came back. " +
+      why + "<br><span style=\"font-family:var(--mono);font-size:11px;color:var(--text-3)\">expected sha256 " + short + "</span>" +
+      "<div style=\"margin-top:9px;display:flex;gap:8px\">" +
+        '<button class="btn" data-fix="locate">Locate file…</button>' +
+        '<button class="btn" data-fix="ignore">Continue without it</button>' +
+      "</div>");
+    d.querySelector('[data-fix="locate"]').addEventListener("click", () => {
+      document.querySelector('.tab[data-screen="cover"]').click();
+      notice("info", "Opens a file picker on the Cover tab. A chosen file is re-hashed — matching audio reuses the cached <code>cover_feature_id</code>, so step 1 costs nothing again.");
+    });
+    d.querySelector('[data-fix="ignore"]').addEventListener("click", () => {
+      notice("info", "Reference cleared. The form is ready as an original generation; switch to the Cover tab and load audio to make it a cover again.");
+    });
+  }
+
+  const DEMO_RECIPE =
+    "---\nminimax_music: 1\ntitle: Neon Off-Ramp\ncreated: 2026-08-14T22:10:00Z\n" +
+    "model: music-3.0-free\ninstrumental: false\nlyrics_optimizer: false\n" +
+    "audio:\n  format: wav\n  sample_rate: 44100\n---\n\n## Caption\n\n" +
+    PRESETS.synth.cap + "\n\n## Lyrics\n\n[Intro]\n\n[Verse]\nHalf past the exit and the dashboard glows\n" +
+    "Every mile marker counting down to nothing\n\n[Chorus]\nDrive it like the tape won't end\n\n[Outro]\n";
+
+  const DEMO_COVER_RECIPE =
+    "---\nminimax_music: 1\ntitle: Hold On (gospel rework)\ncreated: 2026-08-15T09:40:00Z\n" +
+    "model: music-cover-free\ninstrumental: false\nlyrics_optimizer: false\n" +
+    "audio:\n  format: wav\n  sample_rate: 44100\n" +
+    "cover:\n  reference_file: demo-take.wav\n  reference_sha256: 9f2c4b71ae03d8c5f6b2\n  rights_confirmed: true\n" +
+    "---\n\n## Caption\n\nSlow gospel-soul rework, 68 BPM, Hammond organ, brushed kit, single female lead with room reverb.\n\n" +
+    "## Lyrics\n\n[Verse]\nWe drove the long way just to hear the end of it\n\n[Chorus]\nAnd it holds, and it holds, and it holds\n";
+
+  /* ---------- open / drag & drop ---------- */
+  function readRecipeFile(file) {
+    const rd = new FileReader();
+    rd.onload = () => {
+      try { applyRecipe(parseRecipe(String(rd.result)), file.name); }
+      catch (err) { notice("error", "<strong>That file is not a readable recipe.</strong> Expected YAML front matter followed by <code>## Caption</code> and <code>## Lyrics</code>."); }
+    };
+    rd.readAsText(file);
+  }
+
+  $("openRecipe").addEventListener("click", () => {
+    closeCombo();
+    applyRecipe(parseRecipe(DEMO_RECIPE), "neon-off-ramp/song.md");
+  });
+
+  const app = document.querySelector(".app");
+  let dragDepth = 0;
+  app.addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; $("dropzone").classList.add("is-on"); });
+  app.addEventListener("dragover", (e) => e.preventDefault());
+  app.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; $("dropzone").classList.remove("is-on"); } });
+  app.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dragDepth = 0;
+    $("dropzone").classList.remove("is-on");
+    document.querySelector('.tab[data-screen="compose"]').click();
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && /\.(md|txt|markdown)$/i.test(f.name)) readRecipeFile(f);
+    else applyRecipe(parseRecipe(DEMO_RECIPE), f ? f.name : "neon-off-ramp/song.md");
+  });
+  ["dragover", "drop"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
+
+  /* ============================================================
+     SETTINGS DISCLOSURE
+     ============================================================ */
+  $("discBtn").addEventListener("click", () => {
+    const open = $("discBtn").getAttribute("aria-expanded") === "true";
+    $("discBtn").setAttribute("aria-expanded", String(!open));
+    $("discBody").classList.toggle("is-open", !open);
+  });
+
+  function settingsSummary() {
+    const model = $("model").value;
+    const rpm = $("model").selectedOptions[0].dataset.rpm;
+    const fmt = $("format").value;
+    const rate = (Number($("rate").value) / 1000).toFixed(1).replace(".0", "") + " kHz";
+    const br = fmt === "mp3" ? " " + Number($("bitrate").value) / 1000 + " kbps" : "";
+    $("discSummary").textContent = model + " · " + fmt + " " + rate + br + " · " + rpm + " rpm";
+    $("sbModel").textContent = model;
+    $("sbFormat").textContent = fmt + " " + rate + br;
+    $("modelHint").textContent = rpm === "3"
+      ? "Free tier: 3 requests per minute, throttled locally."
+      : "Paid plan required. 120 requests per minute.";
+    $("rateNote").textContent = rpm === "3" ? "2 of 3 requests left this minute" : "120 rpm — no local throttle";
+  }
+  ["model", "format", "rate", "bitrate"].forEach((id) => $(id).addEventListener("change", () => {
+    const mp3 = $("format").value === "mp3";
+    $("bitrate").disabled = !mp3;
+    $("embedRecipe").disabled = !mp3;
+    $("brHint").textContent = mp3 ? "256 kbps recommended." : "mp3 only.";
+    settingsSummary();
+  }));
+
+  /* ============================================================
+     NOTICES
+     ============================================================ */
+  function notice(kind, html) {
+    const box = $("notices");
+    box.innerHTML = "";
+    const d = document.createElement("div");
+    d.className = "notice" + (kind === "error" ? " error" : kind === "warn" ? " warn" : "");
+    d.innerHTML = html;
+    box.appendChild(d);
+    reveal(d);
+    return d;
+  }
+
+  /* scroll a panel into view inside the app's own scroller, never the page */
+  function reveal(el) {
+    const sc = el.closest(".scroller");
+    if (!sc) return;
+    const top = el.offsetTop - sc.clientHeight + el.offsetHeight + 24;
+    sc.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+  function clearNotices() { $("notices").innerHTML = ""; }
+
+  function apiError(code, msg) {
+    notice("error",
+      "<strong>" + msg + "</strong>" +
+      "<details><summary>Details</summary><code>status_code " + code +
+      " · trace_id 0244e1f96b7d4c0a9f31c8be5a70d112</code></details>");
+  }
+
+  /* ============================================================
+     HISTORY
+     ============================================================ */
+  function renderHistory() {
+    const list = $("histList");
+    const q = $("histSearch").value.trim().toLowerCase();
+    const m = $("histModel").value;
+    const shown = state.takes.filter((t) =>
+      (!q || (t.title + " " + t.sub).toLowerCase().includes(q)) && (!m || t.model === m));
+    $("histCount").textContent = state.takes.length;
+    list.innerHTML = "";
+
+    if (!shown.length) {
+      const e = document.createElement("div");
+      e.className = "hist-empty";
+      e.textContent = state.takes.length
+        ? "No takes match that filter."
+        : "No takes yet. Everything you generate is written to ~/MiniMaxMusic with its full run.json.";
+      list.appendChild(e);
+      return;
+    }
+
+    shown.forEach((t) => {
+      const item = document.createElement("div");
+      item.className = "hist-item" + (state.current && state.current.id === t.id ? " is-current" : "");
+      item.innerHTML =
+        '<div class="hi-row1"><span>' + t.when + '</span><span>' + t.model + '</span>' +
+          '<span class="dur">' + mmss(t.dur) + '</span></div>' +
+        '<div class="hi-title">' + t.title + '  <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:400">take ' + t.take + '</span></div>' +
+        '<div class="hi-sub">' + t.sub + '</div>' +
+        '<canvas class="hi-wave" data-seed="' + t.seed + '"></canvas>' +
+        '<div class="hi-acts">' +
+          '<button class="mini" data-act="play">Play</button>' +
+          '<button class="mini" data-act="clone">Clone</button>' +
+          '<button class="mini" data-act="reveal">Reveal</button>' +
+        '</div>';
+
+      item.querySelectorAll(".mini").forEach((b) => {
+        b.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          const act = b.dataset.act;
+          if (act === "play") load(t, true);
+          else if (act === "clone") cloneToForm(t);
+          else if (act === "reveal") revealTake(t);
+        });
+      });
+      item.addEventListener("click", () => load(t, false));
+      list.appendChild(item);
+    });
+    drawAll();
+  }
+
+  $("histSearch").addEventListener("input", renderHistory);
+  $("histModel").addEventListener("change", renderHistory);
+
+  function revealTake(t) {
+    notice("info", "Reveals <code>" + takeDir(t.title, t.take) + "</code> in Finder — <code>track." + t.fmt +
+      "</code> and <code>run.json</code>, with <code>song.md</code> one level up.");
+  }
+
+  function cloneToForm(t) {
+    document.querySelector('.tab[data-screen="compose"]').click();
+    $("songTitle").value = t.title;
+    $("caption").value = t.sub + ". Restored from run.json — caption, lyrics, model, format and both flags come back exactly as they were.";
+    $("caption").dispatchEvent(new Event("input"));
+    syncSlug();
+    notice("info", "Cloned <strong>" + t.title + "</strong> take " + t.take +
+      " into the form. The title carries over — generating again makes it take " + (t.take + 1) + ".");
+  }
+
+  /* ============================================================
+     PLAYER
+     ============================================================ */
+  function load(take, autoplay) {
+    state.current = take;
+    state.pos = 0;
+    $("player").classList.add("is-on");
+    $("playName").textContent = take.title + " — take " + take.take;
+    $("playModel").textContent = take.model + " · " + take.fmt;
+    $("playDur").textContent = mmss(take.dur);
+    $("playPos").textContent = "0:00";
+    renderHistory();
+    drawAll();
+    if (autoplay) { if (!state.playing) togglePlay(); }
+    else if (state.playing) togglePlay();
+  }
+
+  function togglePlay() {
+    if (!state.current) return;
+    state.playing = !state.playing;
+    $("playIcon").innerHTML = state.playing
+      ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>'
+      : '<path d="M8 5l12 7-12 7z"/>';
+    $("playBtn").setAttribute("aria-label", state.playing ? "Pause" : "Play");
+    clearInterval(state.playTimer);
+    if (state.playing) {
+      state.playTimer = setInterval(() => {
+        state.pos += 0.25;
+        if (state.pos >= state.current.dur) { state.pos = state.current.dur; togglePlay(); }
+        $("playPos").textContent = mmss(state.pos);
+        drawWave($("playWave"), state.current.seed, state.pos / state.current.dur);
+      }, 100);
+    }
+  }
+  $("playBtn").addEventListener("click", togglePlay);
+
+  $("playWave").addEventListener("click", (e) => {
+    if (!state.current) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    state.pos = ((e.clientX - r.left) / r.width) * state.current.dur;
+    $("playPos").textContent = mmss(state.pos);
+    drawWave($("playWave"), state.current.seed, state.pos / state.current.dur);
+  });
+
+  $("revealBtn").addEventListener("click", () => { if (state.current) revealTake(state.current); });
+
+  /* ============================================================
+     GENERATION (faked on a timer)
+     ============================================================ */
+  const GEN_SECONDS = 7;
+
+  function startGenerate() {
+    if (!state.keySaved) { state.pendingGenerate = true; openModal(); return; }
+    clearNotices();
+    state.generating = true;
+    let t = 0;
+    $("genPanel").classList.add("is-on");
+    $("elapsed").textContent = "00:00";
+    $("genBtn").disabled = true;
+    $("genBtn").textContent = "Generating…";
+    $("sbLive").innerHTML = '<span class="live">generating 00:00</span>';
+    reveal($("genPanel"));
+    state.genTimer = setInterval(() => {
+      t++;
+      $("elapsed").textContent = clock(t);
+      $("sbLive").innerHTML = '<span class="live">generating ' + clock(t) + "</span>";
+      if (t >= GEN_SECONDS) finishGenerate();
+    }, 1000);
+  }
+
+  function stopGenerate() {
+    clearInterval(state.genTimer);
+    state.generating = false;
+    $("genPanel").classList.remove("is-on");
+    $("genBtn").textContent = "Generate";
+    $("sbLive").innerHTML = "";
+    refreshGenerate();
+  }
+
+  function finishGenerate() {
+    stopGenerate();
+    const cap = $("caption").value.trim();
+    const title = takeTitle();
+    const prior = state.takes.reduce((n, t) => (t.title === title ? Math.max(n, t.take) : n), 0);
+    const take = {
+      id: state.takes.length ? Math.max.apply(null, state.takes.map((t) => t.id)) + 1 : 1,
+      title: title,
+      take: prior + 1,
+      sub: (cap.split(/[.\n]/)[0] || "No caption").slice(0, 90),
+      model: $("model").value,
+      fmt: $("format").value,
+      dur: 90 + Math.floor(Math.random() * 90),
+      when: new Date().toTimeString().slice(0, 5),
+      seed: Math.floor(Math.random() * 400)
+    };
+    state.takes.unshift(take);
+    renderHistory();
+    load(take, false);
+    syncSlug();
+    notice("info", "Saved <strong>" + title + "</strong> take " + take.take + " to <code>" +
+      takeDir(title, take.take) + "</code> — <code>track." + take.fmt + "</code> and <code>run.json</code>, " +
+      "with the AI-generation note in the tags. <code>song.md</code> at the song root was rewritten to match" +
+      (take.fmt === "mp3" ? " and copied into the ID3 comment frame." : "."));
+  }
+
+  $("genBtn").addEventListener("click", () => { if (!state.generating) startGenerate(); });
+  $("cancelBtn").addEventListener("click", () => {
+    stopGenerate();
+    notice("info", "Cancelled. The request was dropped and nothing was written to the library.");
+  });
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !$("genBtn").disabled) $("genBtn").click();
+    if (e.key === "Escape") {
+      if ($("scrim").classList.contains("is-on")) closeModal();
+      if ($("recipeScrim").classList.contains("is-on")) $("recipeScrim").classList.remove("is-on");
+      if ($("diffScrim").classList.contains("is-on")) $("diffScrim").classList.remove("is-on");
+    }
+  });
+
+  /* ============================================================
+     MODAL
+     ============================================================ */
+  function openModal() { $("scrim").classList.add("is-on"); $("keyInput").focus(); }
+  function closeModal() { $("scrim").classList.remove("is-on"); state.pendingGenerate = false; }
+  $("settingsBtn").addEventListener("click", openModal);
+  $("modalCancel").addEventListener("click", closeModal);
+  $("scrim").addEventListener("click", (e) => { if (e.target === $("scrim")) closeModal(); });
+  $("importEnv").addEventListener("click", () => {
+    $("keyInput").value = "••••••••••••••••••••••••8f21";
+    $("keyInput").type = "password";
+  });
+  $("modalSave").addEventListener("click", () => {
+    setKey(true);
+    state.orEnabled = $("orEnable").checked;
+    state.orKey = state.orEnabled ? $("orKey").value.trim() : "";
+    syncLyricTools();
+    closeModal();
+    if (state.pendingGenerate) { state.pendingGenerate = false; startGenerate(); }
+  });
+  $("clearKey").addEventListener("click", () => { $("keyInput").value = ""; setKey(false); closeModal(); });
+
+  function setKey(on) {
+    state.keySaved = on;
+    $("keyPill").dataset.state = on ? "set" : "unset";
+    $("keyPillText").textContent = on ? "Key in Keychain" : "No API key";
+    $("sbKey").textContent = on ? "key: Keychain" : "key: none";
+  }
+
+  /* ============================================================
+     COVER SCREEN
+     ============================================================ */
+  const tl = $("timeline");
+  SEGMENTS.forEach((s) => {
+    const d = document.createElement("div");
+    d.className = "seg";
+    d.style.flexGrow = s.w;
+    if (s.kind) d.dataset.kind = s.kind;
+    d.textContent = s.k;
+    tl.appendChild(d);
+  });
+  $("coverLyrics").value = "[Verse]\nWe drove the long way just to hear the end of it\nRadio static like a second harmony\n\n[Chorus]\nAnd it holds, and it holds, and it holds";
+  $("rightsBox").addEventListener("change", (e) => { $("coverGen").disabled = !e.target.checked; });
+  $("coverGen").addEventListener("click", () => {
+    $("songTitle").value = $("coverTitle").value;
+    $("caption").value = $("coverPrompt").value || $("coverPrompt").placeholder;
+    $("caption").dispatchEvent(new Event("input"));
+    syncSlug();
+    document.querySelector('.tab[data-screen="compose"]').click();
+    startGenerate();
+  });
+
+  /* ============================================================
+     DEMO RIG
+     ============================================================ */
+  document.querySelectorAll(".rig button").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelector('.tab[data-screen="compose"]').click();
+      switch (b.dataset.demo) {
+        case "error":
+          stopGenerate();
+          apiError(1008, "Insufficient balance. music-3.0 needs a funded account — switch to music-3.0-free to keep going.");
+          break;
+        case "auth":
+          stopGenerate();
+          apiError(2049, "Invalid API key. Open settings and paste the key again.");
+          break;
+        case "throttle":
+          stopGenerate();
+          notice("warn", "<strong>Rate limited.</strong> The free tier allows 3 requests per minute. Next slot in <span style=\"font-family:var(--mono)\">0:38</span> — Generate re-enables automatically.");
+          $("sbLive").innerHTML = '<span class="throttle">throttled 0:38</span>';
+          break;
+        case "key":
+          openModal();
+          break;
+        case "assistant":
+          state.orEnabled = true;
+          state.orKey = "saved";
+          $("orEnable").checked = true;
+          $("orKey").value = "••••••••••••••••••••8c04";
+          syncLyricTools();
+          notice("info", "Lyric assistant enabled with <code>" + state.orModel + "</code>. " +
+            "<strong>Check lyrics</strong> now adds craft notes on top of the measured ones, and " +
+            "<strong>Enhance</strong> is live.");
+          break;
+        case "drop":
+          $("dropzone").classList.add("is-on");
+          setTimeout(() => {
+            $("dropzone").classList.remove("is-on");
+            applyRecipe(parseRecipe(DEMO_RECIPE), "neon-off-ramp/song.md");
+          }, 900);
+          break;
+        case "dropcover":
+          $("dropzone").classList.add("is-on");
+          setTimeout(() => {
+            $("dropzone").classList.remove("is-on");
+            applyRecipe(parseRecipe(DEMO_COVER_RECIPE), "hold-on-gospel-rework/song.md");
+          }, 900);
+          break;
+        case "firstrun":
+          setKey(false);
+          state.orKey = "";
+          $("orKey").value = "";
+          syncLyricTools();
+          $("findings").innerHTML = "";
+          state.takes = [];
+          state.current = null;
+          state.playing = false;
+          clearInterval(state.playTimer);
+          $("player").classList.remove("is-on");
+          $("songTitle").value = "";
+          $("caption").value = "";
+          $("lyrics").value = "";
+          $("caption").dispatchEvent(new Event("input"));
+          $("lyrics").dispatchEvent(new Event("input"));
+          syncSlug();
+          clearNotices();
+          renderHistory();
+          break;
+        case "reset":
+          reset();
+          break;
+      }
+    });
+  });
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  function reset() {
+    stopGenerate();
+    clearInterval(state.playTimer);
+    state.playing = false;
+    state.takes = SEED_TAKES.map((t) => Object.assign({}, t));
+    state.current = null;
+    state.pos = 0;
+    setKey(true);
+    state.orEnabled = false;          // the assistant ships off
+    state.orKey = "";
+    $("orEnable").checked = false;
+    $("orKey").value = "";
+    $("player").classList.remove("is-on");
+    state.preset = "last";
+    $("presetLabel").textContent = PRESETS.last.name;
+    $("songTitle").value = PRESETS.last.title;
+    $("caption").value = PRESETS.last.cap;
+    $("lyrics").value = PRESETS.last.lyr;
+    $("histSearch").value = "";
+    $("histModel").value = "";
+    setSwitch($("swInst"), false);
+    setSwitch($("swAuto"), false);
+    $("autoNote").hidden = true;
+    $("swAuto").disabled = false;
+    $("lyrics").disabled = false;
+    $("fieldLyrics").classList.remove("is-muted");
+    document.querySelectorAll("#tags .tag").forEach((t) => (t.disabled = false));
+    clearNotices();
+    $("findings").innerHTML = "";
+    state.findings = [];
+    state.flagged = {};
+    state.lyricUndo = null;
+    $("caption").dispatchEvent(new Event("input"));
+    $("lyrics").dispatchEvent(new Event("input"));
+    syncSlug();
+    renderPresetList();
+    renderOrModels();
+    syncLyricTools();
+    renderGutter();
+    renderHistory();
+  }
+
+  bindCount("caption", "capCount", 2000);
+  bindCount("lyrics", "lyrCount", 3500);
+  bindCount("coverPrompt", "cpCount", 300, 10);
+  bindCount("coverLyrics", "clCount", 1000, 10);
+  settingsSummary();
+  reset();
+})();
+</script>

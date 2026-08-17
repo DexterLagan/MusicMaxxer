@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Core window permissions only. No filesystem or shell access — everything that touches disk or the network goes through a Rust command. The player's read access to the library is granted separately by security.assetProtocol.scope in tauri.conf.json, which is the only mechanism for it; there is no capability permission for the asset protocol.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

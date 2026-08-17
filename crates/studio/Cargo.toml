@@ -1,0 +1,18 @@
+[package]
+name = "studio"
+version = "1.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "App logic for MusicMaxxer: credentials, library layout, recipes, lyric analysis"
+
+[dependencies]
+minimax = { path = "../minimax" }
+serde = { workspace = true }
+thiserror = { workspace = true }
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+serde_json = { workspace = true }
+time = { version = "0.3", features = ["formatting", "parsing"] }
+
+[dev-dependencies]
+tempfile = "3"

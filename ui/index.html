@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MusicMaxxer</title>
+    <link rel="stylesheet" href="/src/app.css" />
+    <script>
+      // Set before first paint so an explicit choice never flashes the wrong
+      // theme. Appearance is not sensitive, so it lives in localStorage rather
+      // than crossing into Rust like the API key does.
+      (function () {
+        try {
+          var pref = localStorage.getItem("musicmaxxer.appearance");
+          if (pref === "light" || pref === "dark") document.documentElement.dataset.theme = pref;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="titlebar">
+      <div class="brand"><span class="mark"></span><span>MusicMaxxer</span></div>
+      <div class="title-right">
+        <span class="keypill" id="keyPill" data-state="unset">
+          <span class="dot"></span><span id="keyPillText">No API key</span>
+        </span>
+        <button class="icon-btn" id="themeBtn" title="Appearance" aria-label="Toggle appearance">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.5.55.87 1.06 1H21a2 2 0 1 1 0 4h-.09c-.5.02-.94.36-1.51 1z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+    <div class="pane-main">
+    <div class="scroller">
+    <main class="compose">
+      <div class="titlefield">
+        <input id="songTitle" class="songtitle" placeholder="Untitled song" maxlength="80"
+               aria-label="Song title" />
+      </div>
+
+      <div class="row-top">
+        <button class="switch" id="swInst" aria-pressed="false">
+          <span class="track"></span>Instrumental
+        </button>
+      </div>
+
+      <section class="field">
+        <div class="field-head">
+          <label for="caption">Caption</label>
+          <span class="count" id="capCount">0 / 2,000</span>
+        </div>
+        <textarea id="caption" rows="3"
+                  placeholder="Genre, tempo, key, mood, vocal character, arrangement…"></textarea>
+      </section>
+
+      <section class="field">
+        <div class="field-head">
+          <label for="lyrics" id="lyricsLabel">Lyrics</label>
+          <span class="hint" id="lengthHint">sections set the length</span>
+          <span class="count" id="lyrCount">0 / 3,500</span>
+        </div>
+        <div class="taglist" id="tags"></div>
+        <textarea id="lyrics" wrap="off"
+                  placeholder="[Verse]&#10;One line per line. Section tags above insert at the cursor."></textarea>
+        <div id="strayWarn" hidden></div>
+      </section>
+
+      <div class="actions">
+        <button class="btn-accent" id="genBtn">Generate</button>
+        <span class="kbd">⌘ ↵</span>
+        <span class="kbd right" id="settingsNote">music-3.0-free · wav 44.1 kHz · 3 rpm</span>
+      </div>
+
+      <div class="gen" id="genPanel">
+        <div class="gen-top">
+          <strong>Generating</strong>
+          <button class="btn danger" id="cancelBtn">Cancel</button>
+          <span class="elapsed" id="elapsed">00:00</span>
+        </div>
+        <p>The API answers once, when the track is finished — there is no progress to
+          report. Observed so far: 44 s to 106 s, unrelated to how long the take is.</p>
+        <div class="bar"><i></i></div>
+      </div>
+
+      <div id="notices"></div>
+    </main>
+    </div>
+
+      <div class="player" id="player">
+        <button class="play-btn" id="playBtn" aria-label="Play">
+          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5l12 7-12 7z" />
+          </svg>
+        </button>
+        <div class="play-main">
+          <div class="play-meta">
+            <span class="name" id="playName"></span>
+            <span class="time"><span id="playPos">0:00</span> / <span id="playDur">0:00</span></span>
+          </div>
+          <input class="seek" id="seek" type="range" min="0" max="1000" value="0"
+                 aria-label="Seek" />
+        </div>
+        <span class="hint">space · ←→ 5s · ⇧←→ 30s</span>
+        <button class="btn" id="revealBtn">Reveal</button>
+      </div>
+    </div>
+
+      <aside class="pane-hist">
+        <div class="hist-head">
+          <div class="hist-title">History <span class="n" id="histCount">0</span></div>
+          <input class="search" id="histSearch" placeholder="Search titles, captions, lyrics" />
+          <div class="hist-filters">
+            <select class="select" id="histRating" aria-label="Filter by rating">
+              <option value="0">Any rating</option>
+              <option value="1">★ 1 and up</option>
+              <option value="2">★ 2 and up</option>
+              <option value="3">★ 3 and up</option>
+              <option value="4">★ 4 and up</option>
+              <option value="5">★ 5 only</option>
+            </select>
+          </div>
+        </div>
+        <div class="hist-list" id="histList"></div>
+      </aside>
+    </div>
+
+    <div class="scrim" id="scrim">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <h2 id="modalTitle">Settings</h2>
+          <p>Your key is stored in the macOS Keychain — never in a config file, a log,
+            or this window. It is written here and never read back out.</p>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section">MiniMax API key</div>
+          <input class="input" id="keyInput" type="password"
+                 placeholder="paste your MiniMax API key" />
+          <div id="keyWarn"></div>
+
+          <div class="modal-section" style="margin-top: 4px">Appearance</div>
+          <div class="radiogroup" id="appearanceGroup">
+            <label class="radio"><input type="radio" name="appearance" value="system" /> System</label>
+            <label class="radio"><input type="radio" name="appearance" value="light" /> Light</label>
+            <label class="radio"><input type="radio" name="appearance" value="dark" /> Dark</label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn danger" id="clearKey">Clear key</button>
+          <div class="right">
+            <button class="btn" id="modalCancel">Cancel</button>
+            <button class="btn-accent small" id="modalSave">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
