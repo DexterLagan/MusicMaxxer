@@ -1,10 +1,23 @@
 # MusicMaxxer
 
-A local macOS desktop app for generating songs through [MiniMax](https://www.minimax.io/)'s
-hosted Music API. Single user, single machine, no server component — every
-generation is a direct call from your own machine to MiniMax's API, and
-everything it produces is written straight to a plain-folder library on your
-disk that you own and can read without the app.
+A local desktop app for macOS and Windows, generating songs through
+[MiniMax](https://www.minimax.io/)'s hosted Music API. Single user, single
+machine, no server component — every generation is a direct call from your
+own machine to MiniMax's API, and everything it produces is written straight
+to a plain-folder library on your disk that you own and can read without the
+app.
+
+## Download
+
+Pre-built binaries for both platforms are on the
+[Releases page](https://github.com/dexterlagan/MusicMaxxer/releases/latest):
+
+- **macOS (Apple Silicon)** — the `.dmg`
+- **Windows (x86_64)** — the `.exe` (NSIS) or `.msi` installer
+
+Neither is code-signed, so macOS Gatekeeper and Windows SmartScreen will both
+flag it on first launch — see the release notes for the one-time bypass on
+each.
 
 <table>
 <tr>
@@ -39,13 +52,16 @@ disk that you own and can read without the app.
 - **Dark mode** — System / Light / Dark, plus a one-click toggle in the
   titlebar.
 - **The API key never leaves Rust.** It's typed once into Settings, stored in
-  the macOS Keychain, and no command ever hands it back to the webview. The
-  frontend cannot reach the network or the filesystem directly — every
-  effect, including audio playback, is routed through a Tauri command.
+  your OS's own credential store (Keychain on macOS, Credential Manager on
+  Windows), and no command ever hands it back to the webview. The frontend
+  cannot reach the network or the filesystem directly — every effect,
+  including audio playback, is routed through a Tauri command.
 
 ## Requirements
 
-- macOS (Apple Silicon or Intel)
+To build from source:
+
+- macOS (Apple Silicon or Intel) or Windows (x86_64)
 - [Rust](https://rustup.rs/) (stable toolchain)
 - [Node.js](https://nodejs.org/) 18+
 - A [MiniMax](https://www.minimax.io/) account with music API access and an
@@ -66,13 +82,14 @@ Run in development mode, with hot reload:
 npm run tauri dev
 ```
 
-Or build a release `.app` bundle:
+Or build a release bundle for your platform:
 
 ```bash
-npm run app:build       # builds target/release/bundle/macos/MusicMaxxer.app
-npm run app             # opens the built bundle
-npm run app:install     # copies it to /Applications
+npm run tauri build     # installer lands under src-tauri/target/release/bundle/
 ```
+
+On macOS, `npm run app:build` / `npm run app` / `npm run app:install` are
+shortcuts for building, opening, and installing the `.app` specifically.
 
 On first launch, open Settings (the gear icon) and paste in your MiniMax API
 key. It's written to the Keychain immediately and never stored anywhere else.
