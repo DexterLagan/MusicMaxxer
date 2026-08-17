@@ -6,7 +6,7 @@ generation is a direct call from your own machine to MiniMax's API, and
 everything it produces is written straight to a plain-folder library on your
 disk that you own and can read without the app.
 
-*(screenshot coming soon)*
+![MusicMaxxer compose screen, dark mode](docs/screenshot.png)
 
 ## What it does
 
