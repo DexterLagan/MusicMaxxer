@@ -231,6 +231,17 @@ textarea::placeholder { color: var(--text-3); }
 .kbd { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
 .kbd.right { margin-left: auto; }
 
+/* A button styled to read exactly like the plain .kbd summary it replaced,
+   so opening the output panel doesn't visually announce itself as a new
+   control — it's a disclosure, not a feature. */
+.output-toggle {
+  border: 0; background: none; padding: 0;
+  transition: color .12s;
+}
+.output-toggle:hover { color: var(--text-2); }
+.output-toggle::after { content: " ▾"; }
+.output-toggle[aria-expanded="true"]::after { content: " ▴"; }
+
 .btn {
   border: var(--hair); background: var(--surface); border-radius: 5px;
   padding: 6px 12px; font-size: 12.5px; color: var(--text-2);
@@ -247,6 +258,40 @@ textarea::placeholder { color: var(--text-3); }
 .btn-accent:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
 .btn-accent:disabled { opacity: .4; cursor: not-allowed; }
 .btn-accent.small { padding: 6px 14px; font-size: 12.5px; }
+
+/* -------------------------------------------------------- output panel */
+
+/* SPEC §6.3: model/format settings stay inline on Compose in a collapsed
+   panel, not the Settings dialog — the same show/hide pattern as .gen. */
+.output-panel {
+  display: none;
+  margin-top: 14px; padding: 14px 16px; gap: 14px;
+  border: var(--hair); border-radius: 6px; background: var(--surface);
+  flex-direction: column;
+}
+.output-panel.is-on { display: flex; }
+
+.output-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.output-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.output-field label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.output-field .select { width: 100%; }
+.output-field-wide { width: 100%; }
+
+.folder-row { display: flex; align-items: center; gap: 8px; }
+.folder-path {
+  flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px;
+  color: var(--text-2); overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .output-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ------------------------------------------------------------ generating */
 

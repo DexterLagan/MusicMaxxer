@@ -9,8 +9,10 @@ pub mod keys;
 pub mod library;
 pub mod lyrics;
 pub mod recipe;
+pub mod settings;
 
 pub use keys::{Credential, InMemoryStore, Keychain, SecretStore, StoreError};
 pub use library::{Library, LibraryError, NewTake, RunRecord, StoredTake, TakeMeta};
 pub use lyrics::{stray_tags, StrayTag, TAGS};
 pub use recipe::{Recipe, RecipeError};
+pub use settings::Settings;

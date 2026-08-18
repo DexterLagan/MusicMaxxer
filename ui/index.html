@@ -77,7 +77,51 @@
       <div class="actions">
         <button class="btn-accent" id="genBtn">Generate</button>
         <span class="kbd">⌘ ↵</span>
-        <span class="kbd right" id="settingsNote">music-3.0-free · wav 44.1 kHz · 3 rpm</span>
+        <button class="kbd right output-toggle" id="outputToggle" type="button"
+                aria-expanded="false" aria-controls="outputPanel"></button>
+      </div>
+
+      <div class="output-panel" id="outputPanel">
+        <div class="output-grid">
+          <div class="output-field">
+            <label for="modelSelect">Model</label>
+            <select class="select" id="modelSelect"></select>
+          </div>
+          <div class="output-field">
+            <label for="formatSelect">Format</label>
+            <select class="select" id="formatSelect">
+              <option value="wav">wav</option>
+              <option value="mp3">mp3</option>
+              <option value="pcm">pcm</option>
+            </select>
+          </div>
+          <div class="output-field">
+            <label for="sampleRateSelect">Sample rate</label>
+            <select class="select" id="sampleRateSelect">
+              <option value="16000">16,000 Hz</option>
+              <option value="24000">24,000 Hz</option>
+              <option value="32000">32,000 Hz</option>
+              <option value="44100">44,100 Hz</option>
+            </select>
+          </div>
+          <div class="output-field">
+            <label for="bitrateSelect">Bitrate</label>
+            <select class="select" id="bitrateSelect">
+              <option value="32000">32 kbps</option>
+              <option value="64000">64 kbps</option>
+              <option value="128000">128 kbps</option>
+              <option value="256000">256 kbps</option>
+            </select>
+          </div>
+        </div>
+        <div class="output-field output-field-wide">
+          <label id="libraryLabel" for="chooseFolderBtn">Library folder</label>
+          <div class="folder-row">
+            <span class="folder-path" id="libraryPath"></span>
+            <button class="btn" id="chooseFolderBtn" type="button">Choose…</button>
+            <button class="btn" id="resetFolderBtn" type="button" hidden>Reset to default</button>
+          </div>
+        </div>
       </div>
 
       <div class="gen" id="genPanel">

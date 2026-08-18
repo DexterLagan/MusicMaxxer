@@ -45,6 +45,23 @@ interface Failure {
   fields: FieldIssue[];
 }
 
+/** One selectable model, as `available_models` returns it. */
+interface ModelInfo {
+  id: string;
+  rpm: number;
+  free_tier: boolean;
+}
+
+/** The whole output-panel state in one shape, as `get_settings`/`save_settings` return it. */
+interface SettingsPayload {
+  model: string;
+  format: string;
+  sample_rate: number;
+  bitrate: number | null;
+  library_root: string;
+  is_custom_library_root: boolean;
+}
+
 /** `studio::Recipe` — the parsed contents of a song.md. */
 interface Recipe {
   title: string;
@@ -122,6 +139,15 @@ const els = {
   playDur: $<HTMLSpanElement>("playDur"),
   seek: $<HTMLInputElement>("seek"),
   revealBtn: $<HTMLButtonElement>("revealBtn"),
+  outputToggle: $<HTMLButtonElement>("outputToggle"),
+  outputPanel: $<HTMLDivElement>("outputPanel"),
+  modelSelect: $<HTMLSelectElement>("modelSelect"),
+  formatSelect: $<HTMLSelectElement>("formatSelect"),
+  sampleRateSelect: $<HTMLSelectElement>("sampleRateSelect"),
+  bitrateSelect: $<HTMLSelectElement>("bitrateSelect"),
+  libraryPath: $<HTMLSpanElement>("libraryPath"),
+  chooseFolderBtn: $<HTMLButtonElement>("chooseFolderBtn"),
+  resetFolderBtn: $<HTMLButtonElement>("resetFolderBtn"),
 };
 
 const CAPTION_MAX = 2000;
@@ -449,6 +475,102 @@ els.lyrics.addEventListener("input", () => {
   // keystroke while someone is mid-word.
   if (lintTimer !== undefined) window.clearTimeout(lintTimer);
   lintTimer = window.setTimeout(() => void lintLyrics(), 250);
+});
+
+// --------------------------------------------------------- output settings
+
+// SPEC §6.3: model/format settings stay inline on Compose in a collapsed
+// panel whose summary shows their current state, not the Settings dialog.
+els.outputToggle.addEventListener("click", () => {
+  const open = els.outputPanel.classList.toggle("is-on");
+  els.outputToggle.setAttribute("aria-expanded", String(open));
+});
+
+// SPEC §3.1's six model IDs, minus the two cover models Compose can never
+// use (no reference audio here) -- the list comes from Rust, with the RPM
+// figure stashed on each option, so the summary line never drifts from the
+// dropdown that produced it.
+async function buildModelSelect() {
+  const models = await invoke<ModelInfo[]>("available_models");
+  els.modelSelect.innerHTML = "";
+  for (const m of models) {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = `${m.id} — ${m.rpm} rpm${m.free_tier ? "" : " (paid)"}`;
+    opt.dataset.rpm = String(m.rpm);
+    els.modelSelect.appendChild(opt);
+  }
+}
+
+function refreshOutputSummary() {
+  const rpm = els.modelSelect.selectedOptions[0]?.dataset.rpm ?? "?";
+  const khz = (Number(els.sampleRateSelect.value) / 1000).toFixed(1);
+  els.outputToggle.textContent = `${els.modelSelect.value} · ${els.formatSelect.value} ${khz} kHz · ${rpm} rpm`;
+}
+
+function applySettingsPayload(payload: SettingsPayload) {
+  els.modelSelect.value = payload.model;
+  els.formatSelect.value = payload.format;
+  els.sampleRateSelect.value = String(payload.sample_rate);
+  els.bitrateSelect.disabled = payload.format !== "mp3";
+  if (payload.bitrate !== null) els.bitrateSelect.value = String(payload.bitrate);
+
+  els.libraryPath.textContent = payload.library_root;
+  els.libraryPath.title = payload.library_root;
+  els.resetFolderBtn.hidden = !payload.is_custom_library_root;
+
+  refreshOutputSummary();
+}
+
+/** Whatever the panel currently shows for the library folder -- null means
+ *  "using the platform default", matching what save_settings expects. */
+function currentLibraryRootOverride(): string | null {
+  return els.resetFolderBtn.hidden ? null : els.libraryPath.textContent;
+}
+
+/// Every control here persists the moment it changes, the same as ratings,
+/// appearance and the API key -- there is no separate "Save settings" step.
+async function saveOutputSettings(libraryRoot: string | null) {
+  try {
+    const payload = await invoke<SettingsPayload>("save_settings", {
+      settings: {
+        model: els.modelSelect.value,
+        format: els.formatSelect.value,
+        sample_rate: Number(els.sampleRateSelect.value),
+        bitrate: els.formatSelect.value === "mp3" ? Number(els.bitrateSelect.value) : null,
+        library_root: libraryRoot,
+      },
+    });
+    applySettingsPayload(payload);
+  } catch (e) {
+    notice("error", escapeHtml(String(e)));
+  }
+}
+
+els.modelSelect.addEventListener("change", () => {
+  void saveOutputSettings(currentLibraryRootOverride());
+});
+els.formatSelect.addEventListener("change", () => {
+  // Snappy: disable bitrate immediately rather than waiting on the round trip.
+  els.bitrateSelect.disabled = els.formatSelect.value !== "mp3";
+  void saveOutputSettings(currentLibraryRootOverride());
+});
+els.sampleRateSelect.addEventListener("change", () => {
+  void saveOutputSettings(currentLibraryRootOverride());
+});
+els.bitrateSelect.addEventListener("change", () => {
+  void saveOutputSettings(currentLibraryRootOverride());
+});
+
+els.chooseFolderBtn.addEventListener("click", async () => {
+  const picked = await invoke<string | null>("pick_library_folder");
+  if (!picked) return; // cancelled -- not an error
+  await saveOutputSettings(picked);
+  await refreshHistory();
+});
+els.resetFolderBtn.addEventListener("click", async () => {
+  await saveOutputSettings(null);
+  await refreshHistory();
 });
 
 // ------------------------------------------------------------------- keys
@@ -938,6 +1060,10 @@ async function generate() {
         caption: els.caption.value,
         lyrics: els.lyrics.value,
         instrumental: instrumental(),
+        model: els.modelSelect.value,
+        format: els.formatSelect.value,
+        sample_rate: Number(els.sampleRateSelect.value),
+        bitrate: els.formatSelect.value === "mp3" ? Number(els.bitrateSelect.value) : null,
       },
     });
     showTake(result);
@@ -1000,6 +1126,15 @@ void buildTagBar();
 void lintLyrics();
 setPlayIcon(false);
 paintSeek(0);
+// The model select must exist before a settings payload can pick an option
+// out of it, so this is sequential rather than a second fire-and-forget.
+void buildModelSelect().then(async () => {
+  try {
+    applySettingsPayload(await invoke<SettingsPayload>("get_settings"));
+  } catch (e) {
+    notice("error", escapeHtml(String(e)));
+  }
+});
 // First launch, or the key was cleared and never replaced: open Settings
 // with the field already focused rather than leaving Generate silently
 // disabled for someone who has no idea why.

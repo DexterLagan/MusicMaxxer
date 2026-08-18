@@ -8,17 +8,21 @@
 //! it into the settings field. That direction is unavoidable in a GUI — what
 //! matters is that it is write-only: no command ever hands a key back out.
 
-use minimax::{Client, Error, GenerationRequest, Model, OutputFormat};
+use minimax::{
+    AudioFormat, AudioSetting, Bitrate, Client, Error, GenerationRequest, Model, OutputFormat,
+    SampleRate,
+};
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use studio::keys::suspicious;
 use studio::library::NewTake;
-use studio::{Credential, Keychain, Library, Recipe, SecretStore, StoredTake};
+use studio::{Credential, Keychain, Library, Recipe, SecretStore, Settings, StoredTake};
 use tokio_util::sync::CancellationToken;
 
 pub struct AppState {
     store: Keychain,
-    library: Library,
+    settings: Mutex<Settings>,
     /// The in-flight generation, so Cancel has something to pull.
     current: Mutex<Option<CancellationToken>>,
 }
@@ -27,9 +31,17 @@ impl AppState {
     fn new() -> Self {
         AppState {
             store: Keychain,
-            library: Library::new(Library::default_root()),
+            settings: Mutex::new(Settings::load()),
             current: Mutex::new(None),
         }
+    }
+
+    /// A fresh `Library` pointed at whatever root is currently in effect.
+    /// `Library` is a thin path wrapper, so building one per call is cheap —
+    /// far cheaper than a caching scheme that could go stale the moment the
+    /// library location setting changes at runtime.
+    fn library(&self) -> Library {
+        Library::new(self.settings.lock().unwrap().effective_library_root())
     }
 }
 
@@ -47,6 +59,13 @@ pub struct ComposeRequest {
     pub caption: String,
     pub lyrics: String,
     pub instrumental: bool,
+    // Typed directly rather than as strings: an invalid model id or sample
+    // rate fails Tauri's own IPC deserialization before this command's body
+    // ever runs, the same free validation `save_settings` gets below.
+    pub model: Model,
+    pub format: AudioFormat,
+    pub sample_rate: SampleRate,
+    pub bitrate: Option<Bitrate>,
 }
 
 #[derive(Debug, Serialize)]
@@ -107,6 +126,42 @@ impl From<Error> for Failure {
     }
 }
 
+/// One selectable model, with the RPM figure the UI shows inline (SPEC §6.3)
+/// so the free/paid tradeoff is visible before it becomes a 1008.
+#[derive(Debug, Serialize)]
+pub struct ModelInfo {
+    pub id: String,
+    pub rpm: u32,
+    pub free_tier: bool,
+}
+
+/// The settings panel's whole state in one payload, so the UI can populate
+/// every control from a single call at boot.
+#[derive(Debug, Serialize)]
+pub struct SettingsPayload {
+    pub model: String,
+    pub format: String,
+    pub sample_rate: u32,
+    pub bitrate: Option<u32>,
+    /// The folder actually in effect right now — resolved server-side so the
+    /// UI never has to know the per-OS default rule.
+    pub library_root: String,
+    /// Whether `library_root` above is a user override or the platform
+    /// default, so the UI knows whether "Reset to default" has anything to do.
+    pub is_custom_library_root: bool,
+}
+
+fn settings_payload(s: &Settings) -> SettingsPayload {
+    SettingsPayload {
+        model: s.model.as_str().to_owned(),
+        format: s.format.extension().to_owned(),
+        sample_rate: s.sample_rate.value(),
+        bitrate: s.bitrate.map(Bitrate::value),
+        library_root: s.effective_library_root().to_string_lossy().into_owned(),
+        is_custom_library_root: s.library_root.is_some(),
+    }
+}
+
 // ------------------------------------------------------------------ commands
 
 #[tauri::command]
@@ -156,10 +211,11 @@ async fn generate(
         .map_err(|e| plain(e.to_string()))?
         .ok_or_else(|| plain("No API key saved. Add one in Settings.".to_owned()))?;
 
-    // Step 3 hardcodes the model and audio settings; step 6 exposes them.
-    let mut request = GenerationRequest::new(Model::Music30Free, OutputFormat::Url)
+    let audio_setting = AudioSetting::new(req.format, req.sample_rate, req.bitrate);
+    let mut request = GenerationRequest::new(req.model, OutputFormat::Url)
         .prompt(req.caption.trim())
-        .instrumental(req.instrumental);
+        .instrumental(req.instrumental)
+        .audio_setting(audio_setting);
 
     // The lyrics field carries structure even for instrumentals — it is what
     // controls take length (SPEC §3.5), so it is never dropped.
@@ -180,10 +236,10 @@ async fn generate(
 
     // SPEC §5: one folder per song, takes inside, receipt beside the audio.
     let stored = state
-        .library
+        .library()
         .save(NewTake {
             title: &req.title,
-            model: Model::Music30Free.as_str(),
+            model: req.model.as_str(),
             caption: req.caption.trim(),
             lyrics: req.lyrics.trim_end(),
             instrumental: req.instrumental,
@@ -194,9 +250,9 @@ async fn generate(
             call_secs: elapsed,
             duration_secs: take.extra.duration_secs(),
             audio: &bytes,
-            extension: "wav",
-            sample_rate: 44100,
-            bitrate: None,
+            extension: req.format.extension(),
+            sample_rate: req.sample_rate.value(),
+            bitrate: req.bitrate.map(Bitrate::value),
         })
         .map_err(|e| plain(e.to_string()))?;
 
@@ -211,14 +267,14 @@ async fn generate(
 
 #[tauri::command]
 fn list_takes(state: tauri::State<'_, AppState>) -> Result<Vec<StoredTake>, String> {
-    state.library.scan().map_err(|e| e.to_string())
+    state.library().scan().map_err(|e| e.to_string())
 }
 
 /// SPEC §5.3. `stars` is 0–5; 0 clears the rating.
 #[tauri::command]
 fn set_rating(state: tauri::State<'_, AppState>, dir: String, stars: u8) -> Result<(), String> {
     state
-        .library
+        .library()
         .set_rating(&dir, stars)
         .map_err(|e| e.to_string())
 }
@@ -227,7 +283,7 @@ fn set_rating(state: tauri::State<'_, AppState>, dir: String, stars: u8) -> Resu
 /// against the library root in Rust, not trusted from the webview.
 #[tauri::command]
 fn delete_take(state: tauri::State<'_, AppState>, dir: String) -> Result<(), String> {
-    state.library.delete_take(&dir).map_err(|e| e.to_string())
+    state.library().delete_take(&dir).map_err(|e| e.to_string())
 }
 
 // ---------------------------------------------------------------- lyrics
@@ -250,7 +306,7 @@ fn lint_lyrics(lyrics: String) -> Vec<studio::StrayTag> {
 
 #[tauri::command]
 fn library_root(state: tauri::State<'_, AppState>) -> String {
-    state.library.root().to_string_lossy().into_owned()
+    state.library().root().to_string_lossy().into_owned()
 }
 
 /// Read a `song.md` so the form can be restored from it. SPEC §7.3.
@@ -284,9 +340,72 @@ fn read_recipe(path: String) -> Result<Recipe, String> {
 #[tauri::command]
 fn take_recipe(state: tauri::State<'_, AppState>, dir: String) -> Result<Recipe, String> {
     state
-        .library
+        .library()
         .recipe_from_take(&dir)
         .map_err(|e| e.to_string())
+}
+
+// -------------------------------------------------------------------- settings
+
+/// SPEC §3.1's six model IDs, minus the two cover models — Compose never sets
+/// reference audio, so a cover model here would fail validation on every
+/// single request. Cover models come back once the Cover tab exists.
+#[tauri::command]
+fn available_models() -> Vec<ModelInfo> {
+    Model::ALL
+        .into_iter()
+        .filter(|m| !m.is_cover())
+        .map(|m| ModelInfo {
+            id: m.as_str().to_owned(),
+            rpm: m.rpm(),
+            free_tier: m.is_free_tier(),
+        })
+        .collect()
+}
+
+#[tauri::command]
+fn get_settings(state: tauri::State<'_, AppState>) -> SettingsPayload {
+    settings_payload(&state.settings.lock().unwrap())
+}
+
+/// Persists model/format/sample-rate/bitrate and an optional library root
+/// override, normalising the bitrate-vs-format rule (SPEC §3.1: mp3 only)
+/// rather than trusting whatever combination the UI last had on screen.
+///
+/// A custom library root is probed with `create_dir_all` before it is
+/// accepted — better to fail here with a clear message than to accept a path
+/// that turns out to be unwritable the next time a take tries to save there.
+#[tauri::command]
+fn save_settings(
+    state: tauri::State<'_, AppState>,
+    mut settings: Settings,
+) -> Result<SettingsPayload, String> {
+    settings.normalise();
+
+    if let Some(root) = &settings.library_root {
+        std::fs::create_dir_all(root)
+            .map_err(|e| format!("Can't use {} as the library folder: {e}", root.display()))?;
+    }
+
+    settings.save().map_err(|e| e.to_string())?;
+    let payload = settings_payload(&settings);
+    *state.settings.lock().unwrap() = settings;
+    Ok(payload)
+}
+
+/// A native folder picker, so the library location can be changed without
+/// typing a path by hand. `None` means the user cancelled — not an error.
+///
+/// Goes straight to `rfd` rather than Tauri's dialog plugin: a native picker
+/// needs no filesystem capability of its own (it is the OS choosing the path,
+/// not the webview), so this avoids a plugin dependency and a
+/// `capabilities/default.json` entry for what is otherwise a two-line call.
+#[tauri::command]
+fn pick_library_folder() -> Option<String> {
+    rfd::FileDialog::new()
+        .set_title("Choose a library folder")
+        .pick_folder()
+        .map(|p: PathBuf| p.to_string_lossy().into_owned())
 }
 
 /// Generate, then immediately turn the expiring URL into bytes (SPEC §6.4).
@@ -354,7 +473,11 @@ pub fn run() {
             read_recipe,
             take_recipe,
             structure_tags,
-            lint_lyrics
+            lint_lyrics,
+            available_models,
+            get_settings,
+            save_settings,
+            pick_library_folder
         ])
         .run(tauri::generate_context!())
         .expect("could not start MusicMaxxer");
