@@ -49,7 +49,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "app"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "minimax",
  "rfd",
@@ -1927,7 +1927,7 @@ checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
 
 [[package]]
 name = "minimax"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "reqwest 0.12.28",
  "serde",
@@ -3348,7 +3348,7 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "studio"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "dirs",
  "keyring",
