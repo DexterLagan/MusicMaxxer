@@ -134,8 +134,8 @@ impl Library {
         Library { root: root.into() }
     }
 
-    /// `~/MiniMaxMusic` on macOS (kept stable — renaming it would orphan
-    /// existing libraries), or `%LOCALAPPDATA%\MusicMaxxer` on Windows.
+    /// `%LOCALAPPDATA%\MusicMaxxer` on Windows, or `~/MiniMaxMusic` on macOS
+    /// (kept stable — renaming it would orphan existing libraries).
     ///
     /// Windows does not reliably set `HOME` outside a shell — launched from
     /// the Start Menu there is no parent process setting it — so reading it

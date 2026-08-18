@@ -3,8 +3,8 @@ name: Release
 # Tauri has no supported macOS → Windows cross-compile path (the Windows
 # bundler needs the MSVC linker and the WebView2 SDK, neither of which exist
 # on macOS). Instead this builds natively on each platform's own GitHub
-# runner — macos-latest is Apple Silicon (M-series), windows-latest is
-# x86_64 — and uploads both bundles to the same draft release.
+# runner — windows-latest is x86_64, macos-latest is Apple Silicon
+# (M-series) — and uploads both bundles to the same draft release.
 on:
   push:
     tags:

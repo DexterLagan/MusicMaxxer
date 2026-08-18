@@ -2,7 +2,7 @@
 //! optional library location override. SPEC §6.3.
 //!
 //! Not sensitive, so this is a plain JSON file rather than the keychain —
-//! Application Support on macOS, Roaming AppData on Windows, the OS
+//! Roaming AppData on Windows, Application Support on macOS, the OS
 //! convention for small app config. Deliberately a *different* folder from
 //! the library itself: settings must be findable before we know where the
 //! library is, since the library root is one of the settings.
@@ -45,8 +45,8 @@ impl Default for Settings {
 }
 
 impl Settings {
-    /// `~/Library/Application Support/MusicMaxxer/settings.json` on macOS,
-    /// `%APPDATA%\MusicMaxxer\settings.json` on Windows.
+    /// `%APPDATA%\MusicMaxxer\settings.json` on Windows,
+    /// `~/Library/Application Support/MusicMaxxer/settings.json` on macOS.
     pub fn config_path() -> PathBuf {
         dirs::config_dir()
             .unwrap_or_else(|| PathBuf::from("."))

@@ -1,6 +1,6 @@
 # MusicMaxxer
 
-A local desktop app for macOS and Windows, generating songs through
+A local desktop app for Windows and macOS, generating songs through
 [MiniMax](https://www.minimax.io/)'s hosted Music API. Single user, single
 machine, no server component — every generation is a direct call from your
 own machine to MiniMax's API, and everything it produces is written straight
@@ -12,10 +12,10 @@ app.
 Pre-built binaries for both platforms are on the
 [Releases page](https://github.com/dexterlagan/MusicMaxxer/releases/latest):
 
-- **macOS (Apple Silicon)** — the `.dmg`
 - **Windows (x86_64)** — the `.exe` (NSIS) or `.msi` installer
+- **macOS (Apple Silicon)** — the `.dmg`
 
-Neither is code-signed, so macOS Gatekeeper and Windows SmartScreen will both
+Neither is code-signed, so Windows SmartScreen and macOS Gatekeeper will both
 flag it on first launch — see the release notes for the one-time bypass on
 each.
 
@@ -52,8 +52,8 @@ each.
 - **Dark mode** — System / Light / Dark, plus a one-click toggle in the
   titlebar.
 - **The API key never leaves Rust.** It's typed once into Settings, stored in
-  your OS's own credential store (Keychain on macOS, Credential Manager on
-  Windows), and no command ever hands it back to the webview. The frontend
+  your OS's own credential store (Credential Manager on Windows, Keychain on
+  macOS), and no command ever hands it back to the webview. The frontend
   cannot reach the network or the filesystem directly — every effect,
   including audio playback, is routed through a Tauri command.
 
@@ -61,7 +61,7 @@ each.
 
 To build from source:
 
-- macOS (Apple Silicon or Intel) or Windows (x86_64)
+- Windows (x86_64) or macOS (Apple Silicon or Intel)
 - [Rust](https://rustup.rs/) (stable toolchain)
 - [Node.js](https://nodejs.org/) 18+
 - A [MiniMax](https://www.minimax.io/) account with music API access and an
@@ -145,11 +145,10 @@ disagreed.
 
 ## Status
 
-Every generation currently uses a fixed model (`music-3.0-free`) and output
-format (wav, 44.1 kHz) — a settings panel for model tier, format, and library
-location is the next planned step. The Cover tab (remixing a reference track)
-and an optional offline/online lyric-assistant pass are designed in the spec
-but not yet built.
+Model, output format, and library location are all configurable from the
+collapsed panel on Compose. The Cover tab (remixing a reference track) and an
+optional offline/online lyric-assistant pass are designed in the spec but not
+yet built.
 
 ## License
 
