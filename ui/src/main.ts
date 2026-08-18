@@ -467,8 +467,8 @@ async function refreshKeyStatus() {
 const MASK = "•".repeat(14);
 let keyEdited = false;
 
-function openSettings() {
-  els.keyWarn.innerHTML = "";
+function openSettings(prompt?: string) {
+  els.keyWarn.innerHTML = prompt ? `<div class="notice">${escapeHtml(prompt)}</div>` : "";
   keyEdited = false;
   els.keyInput.value = hasKey ? MASK : "";
   els.keyInput.placeholder = "paste your MiniMax API key";
@@ -485,7 +485,7 @@ els.keyInput.addEventListener("input", () => {
 
 const closeSettings = () => els.scrim.classList.remove("is-on");
 
-els.settingsBtn.addEventListener("click", openSettings);
+els.settingsBtn.addEventListener("click", () => openSettings());
 els.modalCancel.addEventListener("click", closeSettings);
 els.scrim.addEventListener("click", (e) => {
   if (e.target === els.scrim) closeSettings();
@@ -1000,7 +1000,12 @@ void buildTagBar();
 void lintLyrics();
 setPlayIcon(false);
 paintSeek(0);
-void refreshKeyStatus();
+// First launch, or the key was cleared and never replaced: open Settings
+// with the field already focused rather than leaving Generate silently
+// disabled for someone who has no idea why.
+void refreshKeyStatus().then(() => {
+  if (!hasKey) openSettings("Enter your MiniMax API key to get started.");
+});
 // Cue the newest take on launch, so the transport is there rather than hidden
 // until you happen to click a row.
 void refreshHistory().then(() => {
