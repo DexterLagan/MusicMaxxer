@@ -470,27 +470,33 @@ rather than an accident.
 
 ### 6.3 Settings
 
-A dialog, reachable from the title bar. Output and model settings stay inline on
-Compose in a collapsed panel whose summary shows their current state, so nothing
-is ever secretly wrong.
+**Revision 3** — everything lives in one dialog, reachable from the title bar.
+An earlier revision kept model/format inline on Compose in a collapsed panel;
+in practice that made a rarely-touched control the most visually prominent
+thing on the primary writing screen, while the actual settings dialog held
+only the key and appearance. Moved so "where are the settings" has one answer.
+Compose keeps a plain, non-interactive summary of the current choice (model,
+format, sample rate, RPM) so it's still visible without opening the dialog.
 
-**Output & model** (inline on Compose):
-- Model/tier selector, showing the RPM difference inline.
-- Format (`mp3`/`wav`/`pcm`), sample rate, bitrate. **Bitrate disabled unless
-  mp3.** Default to `wav` @ 44100 — the user is producing masters, not previews.
-- **Embed recipe in file tags** — checkbox, on by default, **disabled unless the
-  format is mp3**. Copies `song.md` into an ID3 comment frame so a track that
-  leaves the library still carries its recipe. Do not attempt this for wav or
-  pcm: the tagging is fragile and DAWs strip it.
-- Library directory picker.
-
-**Settings dialog:**
-- **API key** — MiniMax. Replace / clear, plus the `MINIMAX_API_KEY` import.
+- **API key** — MiniMax. Replace / clear. Settings-dialog field only — the app
+  does not read the environment (§2).
+- **Output** — model/tier selector showing the RPM difference inline; format
+  (`mp3`/`wav`/`pcm`), sample rate, bitrate. **Bitrate is mp3-only** — for wav
+  and pcm the control shows **N/A**, not a disabled-but-real-looking number,
+  since a stray bitrate value that means nothing is worse than no value at
+  all. Default to `wav` @ 44100 — the user is producing masters, not previews.
+- **Library folder** — a native picker, plus a reset to the platform default.
+  Takes effect immediately, no restart.
 - **Lyric assistant** — optional, **off by default** (§8.5). An enable checkbox;
   the OpenRouter key field and model picker stay disabled until it is ticked.
   Unticking clears the stored key.
 - **Appearance** — three radios: **System (default)**, Light, Dark. System means
   no stored override; follow the OS.
+
+Deferred, not yet built: **Embed recipe in file tags** — a checkbox, on by
+default, disabled unless the format is mp3, that copies `song.md` into an ID3
+comment frame so a track that leaves the library still carries its recipe. Do
+not attempt this for wav or pcm: the tagging is fragile and DAWs strip it.
 
 ### 6.4 Output
 

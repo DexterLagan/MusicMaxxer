@@ -139,8 +139,7 @@ const els = {
   playDur: $<HTMLSpanElement>("playDur"),
   seek: $<HTMLInputElement>("seek"),
   revealBtn: $<HTMLButtonElement>("revealBtn"),
-  outputToggle: $<HTMLButtonElement>("outputToggle"),
-  outputPanel: $<HTMLDivElement>("outputPanel"),
+  outputSummary: $<HTMLSpanElement>("outputSummary"),
   modelSelect: $<HTMLSelectElement>("modelSelect"),
   formatSelect: $<HTMLSelectElement>("formatSelect"),
   sampleRateSelect: $<HTMLSelectElement>("sampleRateSelect"),
@@ -479,12 +478,11 @@ els.lyrics.addEventListener("input", () => {
 
 // --------------------------------------------------------- output settings
 
-// SPEC §6.3: model/format settings stay inline on Compose in a collapsed
-// panel whose summary shows their current state, not the Settings dialog.
-els.outputToggle.addEventListener("click", () => {
-  const open = els.outputPanel.classList.toggle("is-on");
-  els.outputToggle.setAttribute("aria-expanded", String(open));
-});
+// Model/format/library live in the Settings dialog, alongside the API key
+// and appearance -- moved out of an inline Compose panel, which turned out
+// more discoverable than useful sitting on the primary writing screen. A
+// plain summary stays on Compose (#outputSummary, set below) so the current
+// choice is still visible at a glance without opening the dialog.
 
 // SPEC §3.1's six model IDs, minus the two cover models Compose can never
 // use (no reference audio here) -- the list comes from Rust, with the RPM
@@ -505,7 +503,7 @@ async function buildModelSelect() {
 function refreshOutputSummary() {
   const rpm = els.modelSelect.selectedOptions[0]?.dataset.rpm ?? "?";
   const khz = (Number(els.sampleRateSelect.value) / 1000).toFixed(1);
-  els.outputToggle.textContent = `${els.modelSelect.value} · ${els.formatSelect.value} ${khz} kHz · ${rpm} rpm`;
+  els.outputSummary.textContent = `${els.modelSelect.value} · ${els.formatSelect.value} ${khz} kHz · ${rpm} rpm`;
 }
 
 function applySettingsPayload(payload: SettingsPayload) {
@@ -513,7 +511,9 @@ function applySettingsPayload(payload: SettingsPayload) {
   els.formatSelect.value = payload.format;
   els.sampleRateSelect.value = String(payload.sample_rate);
   els.bitrateSelect.disabled = payload.format !== "mp3";
-  if (payload.bitrate !== null) els.bitrateSelect.value = String(payload.bitrate);
+  // "" selects the N/A option -- wav/pcm genuinely have no bitrate, rather
+  // than showing a disabled-but-real-looking 32 kbps that means nothing.
+  els.bitrateSelect.value = payload.bitrate !== null ? String(payload.bitrate) : "";
 
   els.libraryPath.textContent = payload.library_root;
   els.libraryPath.title = payload.library_root;
@@ -522,10 +522,17 @@ function applySettingsPayload(payload: SettingsPayload) {
   refreshOutputSummary();
 }
 
-/** Whatever the panel currently shows for the library folder -- null means
+/** Whatever the dialog currently shows for the library folder -- null means
  *  "using the platform default", matching what save_settings expects. */
 function currentLibraryRootOverride(): string | null {
   return els.resetFolderBtn.hidden ? null : els.libraryPath.textContent;
+}
+
+/** mp3 needs a real bitrate to submit; wav/pcm must send none. Handles the
+ *  N/A placeholder (value "") on both sides of that boundary. */
+function currentBitrate(): number | null {
+  if (els.formatSelect.value !== "mp3") return null;
+  return els.bitrateSelect.value ? Number(els.bitrateSelect.value) : 256000;
 }
 
 /// Every control here persists the moment it changes, the same as ratings,
@@ -537,7 +544,7 @@ async function saveOutputSettings(libraryRoot: string | null) {
         model: els.modelSelect.value,
         format: els.formatSelect.value,
         sample_rate: Number(els.sampleRateSelect.value),
-        bitrate: els.formatSelect.value === "mp3" ? Number(els.bitrateSelect.value) : null,
+        bitrate: currentBitrate(),
         library_root: libraryRoot,
       },
     });
@@ -551,8 +558,11 @@ els.modelSelect.addEventListener("change", () => {
   void saveOutputSettings(currentLibraryRootOverride());
 });
 els.formatSelect.addEventListener("change", () => {
-  // Snappy: disable bitrate immediately rather than waiting on the round trip.
-  els.bitrateSelect.disabled = els.formatSelect.value !== "mp3";
+  // Snappy: reflect the N/A-vs-real-bitrate state immediately rather than
+  // waiting on the round trip.
+  const isMp3 = els.formatSelect.value === "mp3";
+  els.bitrateSelect.disabled = !isMp3;
+  els.bitrateSelect.value = isMp3 ? els.bitrateSelect.value || "256000" : "";
   void saveOutputSettings(currentLibraryRootOverride());
 });
 els.sampleRateSelect.addEventListener("change", () => {
@@ -1063,7 +1073,7 @@ async function generate() {
         model: els.modelSelect.value,
         format: els.formatSelect.value,
         sample_rate: Number(els.sampleRateSelect.value),
-        bitrate: els.formatSelect.value === "mp3" ? Number(els.bitrateSelect.value) : null,
+        bitrate: currentBitrate(),
       },
     });
     showTake(result);
